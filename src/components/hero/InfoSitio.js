@@ -1,799 +1,860 @@
-// src/components/hero/InfoSitio.js
-import React, { useEffect, useMemo, useRef, useState } from "react";
+// src/components/hero/InfoSitio.jsx
+import * as React from "react";
 import Link from "next/link";
+import { useMemo } from "react";
 import usePublicSite from "@/hooks/usePublicSite";
 
+import {
+  Box,
+  Container,
+  Typography,
+  Button,
+  Stack,
+  Chip,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  alpha,
+} from "@mui/material";
+
+import WhatsAppIcon from "@mui/icons-material/WhatsApp";
+import ArrowForwardIosRoundedIcon from "@mui/icons-material/ArrowForwardIosRounded";
+import CategoryOutlinedIcon from "@mui/icons-material/CategoryOutlined";
+import LocalShippingOutlinedIcon from "@mui/icons-material/LocalShippingOutlined";
+import PaymentsOutlinedIcon from "@mui/icons-material/PaymentsOutlined";
+import VerifiedOutlinedIcon from "@mui/icons-material/VerifiedOutlined";
+import SupportAgentOutlinedIcon from "@mui/icons-material/SupportAgentOutlined";
+import Inventory2OutlinedIcon from "@mui/icons-material/Inventory2Outlined";
+import LocalOfferOutlinedIcon from "@mui/icons-material/LocalOfferOutlined";
+import AccountBalanceOutlinedIcon from "@mui/icons-material/AccountBalanceOutlined";
+import CreditCardOutlinedIcon from "@mui/icons-material/CreditCardOutlined";
+import LocationOnOutlinedIcon from "@mui/icons-material/LocationOnOutlined";
+import RequestQuoteOutlinedIcon from "@mui/icons-material/RequestQuoteOutlined";
+import BlockOutlinedIcon from "@mui/icons-material/BlockOutlined";
+
+/** Paleta (la tuya) */
+const BRAND = {
+  accent: "#E94B7C", // fucsia
+  soft: "#F8D8E0", // soft pink
+  grey: "#5A5A5A", // warm grey
+  white: "#FFFFFF", // white
+};
+
+/** Convierte a URL absoluta si viene relativa */
 function toAbs(url) {
   if (!url) return "";
-  if (String(url).startsWith("http")) return url;
-  return `https://mitiendaenlineamx.com.mx${String(url).startsWith("/") ? "" : "/"}${url}`;
+  const s = String(url);
+  if (s.startsWith("http")) return s;
+  return `https://mitiendaenlineamx.com.mx${s.startsWith("/") ? "" : "/"}${s}`;
 }
 
-/** Helper: animaciones al entrar a viewport (sin libs) */
-function useInView(opts = { threshold: 0.12 }) {
-  const ref = useRef(null);
-  const [inView, setInView] = useState(false);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-
-    let alive = true;
-    const obs = new IntersectionObserver(([entry]) => {
-      if (!alive) return;
-      if (entry.isIntersecting) {
-        setInView(true);
-        obs.disconnect();
-      }
-    }, opts);
-
-    obs.observe(el);
-    return () => {
-      alive = false;
-      obs.disconnect();
-    };
-  }, [opts]);
-
-  return { ref, inView };
+/** Lee una URL del carrusel aunque venga como string u objeto */
+function pickCarouselUrl(item) {
+  if (!item) return "";
+  if (typeof item === "string") return item;
+  return item.url || item.src || item.image || item.imagen || item.path || item.file || "";
 }
 
-function SectionHeader({ title, subtitle, ctaHref = "/service", ctaLabel = "Compra ahora" }) {
+/** Botón con palpitación + sheen */
+function PulseButton({ sx, ...props }) {
   return (
-    <div className="pa-secHead">
-      <div className="pa-secHead__text">
-        <h3 className="pa-h2">{title}</h3>
-        {subtitle ? <p className="pa-sub">{subtitle}</p> : null}
-      </div>
-
-      <Link href={ctaHref} className="pa-secCta" aria-label={ctaLabel}>
-        <span className="pa-secCta__dot" />
-        {ctaLabel}
-      </Link>
-    </div>
+    <Button
+      {...props}
+      sx={{
+        borderRadius: 2.5,
+        fontWeight: 950,
+        textTransform: "none",
+        px: { xs: 2.6, md: 3 },
+        py: { xs: 1.2, md: 1.35 },
+        bgcolor: BRAND.accent,
+        color: BRAND.white,
+        boxShadow: `0 16px 36px ${alpha(BRAND.accent, 0.33)}, 0 8px 18px rgba(0,0,0,0.12)`,
+        position: "relative",
+        overflow: "hidden",
+        transition: "transform 180ms ease, filter 180ms ease",
+        "@keyframes pulseSoft": {
+          "0%,100%": { transform: "translateY(0) scale(1)" },
+          "50%": { transform: "translateY(-1px) scale(1.02)" },
+        },
+        animation: "pulseSoft 2.2s ease-in-out infinite",
+        "&:hover": {
+          animation: "none",
+          bgcolor: BRAND.accent,
+          transform: "translateY(-2px) scale(1.03)",
+          filter: "saturate(1.05)",
+        },
+        "&:after": {
+          content: '""',
+          position: "absolute",
+          top: "-45%",
+          left: "-60%",
+          width: "55%",
+          height: "190%",
+          transform: "rotate(20deg)",
+          background:
+            "linear-gradient(to right, rgba(255,255,255,0), rgba(255,255,255,0.35), rgba(255,255,255,0))",
+          opacity: 0,
+        },
+        "&:hover:after": {
+          opacity: 1,
+          animation: "sheen 900ms ease forwards",
+        },
+        "@keyframes sheen": {
+          "0%": { left: "-60%" },
+          "100%": { left: "130%" },
+        },
+        ...(sx || {}),
+      }}
+    />
   );
 }
 
-function SectionMedia({ src, alt, position = "center center" }) {
+/** ✅ Imagen: ocupa 100% del contenedor (sin maxWidth) */
+function LandingMedia({ src, alt, position = "center 40%" }) {
   if (!src) return null;
+
   return (
-    <div className="pa-media" aria-hidden="true">
-      <img className="pa-media__img" src={src} alt={alt || ""} style={{ objectPosition: position }} />
-    </div>
+    <Box
+      sx={{
+        width: "100%",
+        aspectRatio: { xs: "16 / 10", md: "4 / 3" },
+        borderRadius: { xs: 3, md: 3.5 },
+        overflow: "hidden",
+        border: `1px solid ${alpha(BRAND.accent, 0.18)}`,
+        background: alpha(BRAND.soft, 0.55),
+        boxShadow: "0 22px 65px rgba(0,0,0,0.14)",
+      }}
+    >
+      <Box
+        component="img"
+        src={src}
+        alt={alt || ""}
+        loading="lazy"
+        decoding="async"
+        sx={{
+          width: "100%",
+          height: "100%",
+          display: "block",
+          objectFit: "cover",
+          objectPosition: position,
+          transition: "transform 700ms ease",
+          ".pa-landingSection:hover &": { transform: "scale(1.03)" },
+        }}
+      />
+    </Box>
+  );
+}
+
+/** Recuadro tipo “beneficio” */
+function BenefitBox({ icon, title, desc }) {
+  return (
+    <Box
+      sx={{
+        mt: 2,
+        borderRadius: 3,
+        border: `1px solid ${alpha(BRAND.accent, 0.14)}`,
+        background: alpha(BRAND.white, 0.88),
+        boxShadow: "0 18px 55px rgba(0,0,0,0.06)",
+        p: { xs: 2, md: 2.25 },
+        display: "flex",
+        gap: 1.5,
+        alignItems: "flex-start",
+      }}
+    >
+      <Box
+        aria-hidden="true"
+        sx={{
+          width: 44,
+          height: 44,
+          borderRadius: 2.25,
+          display: "grid",
+          placeItems: "center",
+          color: BRAND.accent,
+          background: alpha(BRAND.accent, 0.10),
+          border: `1px solid ${alpha(BRAND.accent, 0.18)}`,
+          flex: "0 0 auto",
+        }}
+      >
+        {icon}
+      </Box>
+
+      <Box sx={{ minWidth: 0 }}>
+        <Typography
+          sx={{
+            fontWeight: 950,
+            color: "#222",
+            fontSize: { xs: 15.5, md: 16.5 },
+            lineHeight: 1.25,
+          }}
+        >
+          {title}
+        </Typography>
+        <Typography
+          sx={{
+            mt: 0.5,
+            color: alpha(BRAND.grey, 0.95),
+            fontSize: { xs: 13.75, md: 14.5 },
+            lineHeight: 1.6,
+          }}
+        >
+          {desc}
+        </Typography>
+      </Box>
+    </Box>
+  );
+}
+
+/** Lista de puntos */
+function FeatureList({ items = [] }) {
+  return (
+    <List
+      dense
+      disablePadding
+      sx={{
+        mt: 1.25,
+        display: "grid",
+        gap: 0.8,
+        "& .MuiListItem-root": {
+          borderRadius: 2.75,
+          px: { xs: 1, md: 1.25 },
+          py: { xs: 0.95, md: 1.05 },
+          border: `1px solid ${alpha(BRAND.accent, 0.12)}`,
+          background: alpha(BRAND.white, 0.86),
+          boxShadow: "0 12px 34px rgba(0,0,0,0.05)",
+          transition: "transform 180ms ease, box-shadow 180ms ease, background 180ms ease",
+          alignItems: "flex-start",
+          "&:hover": {
+            transform: { md: "translateY(-2px)" },
+            boxShadow: "0 18px 46px rgba(0,0,0,0.09)",
+            background: alpha(BRAND.soft, 0.55),
+          },
+        },
+        "& .MuiListItemIcon-root": {
+          minWidth: 44,
+          mt: "2px",
+          color: BRAND.accent,
+        },
+        "& .MuiListItemText-primary": {
+          fontWeight: 950,
+          color: "#222",
+          fontSize: { xs: 15.5, md: 16.5 },
+          lineHeight: 1.25,
+        },
+        "& .MuiListItemText-secondary": {
+          color: alpha(BRAND.grey, 0.95),
+          fontSize: { xs: 13.75, md: 14.5 },
+          lineHeight: 1.55,
+          mt: 0.25,
+        },
+      }}
+    >
+      {items.map((it, idx) => (
+        <ListItem key={idx}>
+          <ListItemIcon>{it.icon}</ListItemIcon>
+          <ListItemText primary={it.title} secondary={it.desc} />
+        </ListItem>
+      ))}
+    </List>
+  );
+}
+
+/**
+ * ✅ LandingSection FIX DEFINITIVO:
+ * - md+: 2 columnas 50/50 con CSS Grid (siempre lado a lado)
+ * - xs: columna con INFO primero y luego IMAGEN
+ * - flip: intercambia columnas en escritorio (no afecta móvil)
+ */
+function LandingSection({
+  flip = false,
+  kicker,
+  title,
+  subtitle,
+  mediaSrc,
+  mediaAlt,
+  mediaPos,
+  anim = "fadeUp",
+  children,
+}) {
+  const hasMedia = Boolean(mediaSrc);
+
+  return (
+    <Box
+      className="pa-landingSection"
+      component="section"
+      sx={{
+        borderRadius: 3.5,
+        background: alpha(BRAND.white, 0.92),
+        border: `1px solid ${alpha(BRAND.accent, 0.16)}`,
+        boxShadow: "0 22px 70px rgba(0,0,0,0.08)",
+        p: { xs: 2.25, md: 3.25 },
+        overflow: "hidden",
+        position: "relative",
+        mb: 3,
+
+        animation: {
+          fadeUp: "paFadeUp 700ms ease both",
+          slideLeft: "paSlideLeft 750ms ease both",
+          slideRight: "paSlideRight 750ms ease both",
+          zoomIn: "paZoomIn 650ms ease both",
+          pop: "paPop 800ms cubic-bezier(.2,.9,.2,1) both",
+        }[anim],
+
+        "@keyframes paFadeUp": {
+          from: { opacity: 0, transform: "translateY(14px)" },
+          to: { opacity: 1, transform: "translateY(0)" },
+        },
+        "@keyframes paSlideLeft": {
+          from: { opacity: 0, transform: "translateX(-18px)" },
+          to: { opacity: 1, transform: "translateX(0)" },
+        },
+        "@keyframes paSlideRight": {
+          from: { opacity: 0, transform: "translateX(18px)" },
+          to: { opacity: 1, transform: "translateX(0)" },
+        },
+        "@keyframes paZoomIn": {
+          from: { opacity: 0, transform: "scale(0.975)" },
+          to: { opacity: 1, transform: "scale(1)" },
+        },
+        "@keyframes paPop": {
+          from: { opacity: 0, transform: "translateY(10px) scale(0.985)" },
+          to: { opacity: 1, transform: "translateY(0) scale(1)" },
+        },
+        "@media (prefers-reduced-motion: reduce)": { animation: "none" },
+
+        "&:before": {
+          content: '""',
+          position: "absolute",
+          inset: "-140px -140px auto auto",
+          width: 320,
+          height: 320,
+          borderRadius: "50%",
+          background: `radial-gradient(circle, ${alpha(BRAND.accent, 0.14)}, transparent 60%)`,
+          pointerEvents: "none",
+        },
+      }}
+    >
+      <Box
+        sx={{
+          display: { xs: "flex", md: "grid" },
+          flexDirection: { xs: "column", md: "unset" },
+          gridTemplateColumns: { md: hasMedia ? "1fr 1fr" : "1fr" }, // ✅ 50/50 real
+          gap: { xs: 2.25, md: 4 },
+          alignItems: "center",
+        }}
+      >
+        {/* INFO (siempre primero en móvil) */}
+        <Box
+          sx={{
+            order: { xs: 1, md: flip ? 2 : 1 },
+            minWidth: 0,
+            pr: { md: flip ? 0 : 1.25 },
+            pl: { md: flip ? 1.25 : 0 },
+          }}
+        >
+          <Stack spacing={1.25} sx={{ minWidth: 0 }}>
+            {kicker ? (
+              <Typography
+                sx={{
+                  fontWeight: 900,
+                  letterSpacing: 2,
+                  textTransform: "uppercase",
+                  color: BRAND.accent,
+                  fontSize: 12,
+                  textAlign: { xs: "center", md: "left" },
+                }}
+              >
+                {kicker}
+              </Typography>
+            ) : null}
+
+            <Typography
+              sx={{
+                fontWeight: 950,
+                letterSpacing: -0.6,
+                color: "#111",
+                lineHeight: 1.08,
+                fontSize: { xs: 28, sm: 34, md: 44 },
+                textAlign: { xs: "center", md: "left" },
+              }}
+            >
+              {title}
+            </Typography>
+
+            {subtitle ? (
+              <Typography
+                sx={{
+                  color: alpha(BRAND.grey, 0.95),
+                  lineHeight: 1.75,
+                  fontSize: { xs: 14.75, md: 16.5 },
+                  textAlign: { xs: "center", md: "left" },
+                  maxWidth: "none", // ✅ no restringir el 50%
+                }}
+              >
+                {subtitle}
+              </Typography>
+            ) : null}
+
+            <Box sx={{ width: "100%", minWidth: 0 }}>{children}</Box>
+          </Stack>
+        </Box>
+
+        {/* IMAGEN (abajo en móvil) */}
+        {hasMedia ? (
+          <Box
+            sx={{
+              order: { xs: 2, md: flip ? 1 : 2 },
+              width: "100%",
+              minWidth: 0,
+              display: "flex",
+              justifyContent: "center",
+            }}
+          >
+            <LandingMedia src={mediaSrc} alt={mediaAlt} position={mediaPos} />
+          </Box>
+        ) : null}
+      </Box>
+    </Box>
   );
 }
 
 export default function InfoSitio() {
   const { store, sitio, carrusel } = usePublicSite();
 
-  const titulo = useMemo(() => {
-    return sitio?.titulo_1 || store?.name || "Perfumes 100% originales, listos para envío";
-  }, [sitio?.titulo_1, store?.name]);
+  const storeName = store?.name || "Perfumería Ángeles";
+  const title = sitio?.titulo_1 || "Perfumes 100% originales";
+  const description =
+    sitio?.descripcion ||
+    "Compra fácil por WhatsApp, promos VIP y envíos a todo México. Sin complicarte.";
 
-  const descripcion = useMemo(() => {
-    return (
-      sitio?.descripcion ||
-      "Atención humana por WhatsApp, promos VIP y envíos a toda la República. Perfumes árabes y de diseñador en existencia real."
-    );
-  }, [sitio?.descripcion]);
-
-  // Carrusel: agarramos imágenes por índice (1..4) como pediste
-  const car = useMemo(() => {
+  // ✅ Carrusel: MISMA LÓGICA (index-based)
+  const carouselUrls = useMemo(() => {
     const arr = Array.isArray(carrusel) ? carrusel : [];
-    return {
-      // “número 1” => index 1
-      explore: toAbs(arr?.[1]),
-      // “número 2” => index 2
-      shipping: toAbs(arr?.[2]),
-      // “número 3” => index 3
-      payments: toAbs(arr?.[3]),
-      // “número 4” => index 4
-      warranty: toAbs(arr?.[4]),
-    };
+    return arr.map((x) => toAbs(pickCarouselUrl(x))).filter(Boolean);
   }, [carrusel]);
 
-  const { ref: heroRef, inView: heroIn } = useInView();
-  const { ref: exploreRef, inView: exploreIn } = useInView();
-  const { ref: warrantyRef, inView: warrantyIn } = useInView();
-  const { ref: shippingRef, inView: shippingIn } = useInView();
-  const { ref: paymentsRef, inView: paymentsIn } = useInView();
+  // índices como ya lo traías (1..4)
+  const imgExplora = carouselUrls?.[1] || "";
+  const imgEnvios = carouselUrls?.[2] || "";
+  const imgPagos = carouselUrls?.[3] || "";
+  const imgGarantia = carouselUrls?.[4] || "";
 
-  const categories = useMemo(
+  const categorias = useMemo(
     () => [
-      { icon: "🧴", title: "Perfumes Árabes", desc: "Aromas intensos y elegantes. Tendencia top." },
-      { icon: "💎", title: "Perfumes de Diseñador", desc: "Clásicos y nuevos lanzamientos con entrega rápida." },
-      { icon: "👩", title: "Perfumes de Dama", desc: "Dulces, frescos, intensos. Te ayudamos a elegir." },
-      { icon: "👨", title: "Perfumes de Caballero", desc: "Aromas para diario, oficina o noche." },
-      { icon: "🧪", title: "Decants (muestras)", desc: "Prueba antes de comprar tu botella grande." },
-      { icon: "📦", title: "Venta a Mayoreo", desc: "Para revendedores: surtido real y rotación alta." },
-    ],
-    []
-  );
-
-  const bullets = useMemo(
-    () => [
-      {
-        title: "Asesoría humana por WhatsApp",
-        desc: "Cotiza rápido y elige el perfume ideal. Sin bots fríos.",
-        icon: "💬",
-      },
-      {
-        title: "Promos VIP que cambian por campaña",
-        desc: "Ofertas exclusivas en grupo VIP: urgencia real y recompra.",
-        icon: "🔥",
-      },
-      {
-        title: "Existencia real y envío inmediato",
-        desc: "Perfumes árabes y de diseñador listos para salir.",
-        icon: "⚡",
-      },
-    ],
-    []
-  );
-
-  const shipping = useMemo(
-    () => [
-      { title: "Envíos a todo México", desc: "Entrega 2 a 5 días hábiles según paquetería.", icon: "🚚" },
-      { title: "Tapachula", desc: "Mandadito local: mismo día o día siguiente.", icon: "🏍️" },
-      { title: "Entrega/recogida local", desc: "Si estás en Tapachula, coordinamos fácil.", icon: "📍" },
-    ],
-    []
-  );
-
-  const payments = useMemo(
-    () => [
-      { title: "Transferencia o depósito", icon: "💳" },
-      { title: "Efectivo", icon: "💵" },
-      { title: "Tarjeta de crédito", icon: "💳", note: "Puede aplicar comisión" },
-      { title: "Apartado con anticipo", icon: "📦", note: "En productos seleccionados" },
+      "Perfumes Árabes",
+      "Perfumes de Diseñador",
+      "Perfumes de Dama",
+      "Perfumes de Caballero",
+      "Decants (muestras)",
+      "Venta a Mayoreo",
     ],
     []
   );
 
   return (
-    <>
-      <style jsx>{`
-        .pa-page {
-          background: var(--seacab-white);
-          color: var(--seacab-black);
-          padding: 44px 0 36px;
-        }
+    <Box
+      sx={{
+        py: { xs: 4, md: 6 },
+        background: `linear-gradient(180deg, ${alpha(BRAND.soft, 0.55)}, ${BRAND.white} 55%)`,
+      }}
+    >
+      <Container maxWidth="lg">
+        {/* ================= HERO ================= */}
+        <Box
+          sx={{
+            borderRadius: 3.5,
+            background: alpha(BRAND.white, 0.92),
+            border: `1px solid ${alpha(BRAND.accent, 0.18)}`,
+            boxShadow: "0 22px 70px rgba(0,0,0,0.10)",
+            px: { xs: 2.25, md: 3.5 },
+            py: { xs: 3, md: 3.75 },
+            textAlign: "center",
+            position: "relative",
+            overflow: "hidden",
+            mb: 3,
+            "&:before": {
+              content: '""',
+              position: "absolute",
+              inset: "-140px -140px auto auto",
+              width: 320,
+              height: 320,
+              borderRadius: "50%",
+              background: `radial-gradient(circle, ${alpha(BRAND.accent, 0.16)}, transparent 60%)`,
+              pointerEvents: "none",
+            },
+          }}
+        >
+          <Chip
+            label={storeName}
+            variant="outlined"
+            sx={{
+              mb: 1.5,
+              px: 0.5,
+              fontWeight: 950,
+              bgcolor: alpha(BRAND.accent, 0.10),
+              borderColor: alpha(BRAND.accent, 0.20),
+              color: "#222",
+            }}
+          />
 
-        .pa-wrap {
-          max-width: 1100px;
-          margin: 0 auto;
-          padding: 0 16px;
-        }
+          <Typography
+            sx={{
+              fontWeight: 950,
+              letterSpacing: -0.9,
+              lineHeight: 1.08,
+              mb: 1,
+              fontSize: { xs: 30, md: 46 },
+              color: "#111",
+            }}
+          >
+            {title}
+          </Typography>
 
-        /* ===== Sección genérica ===== */
-        .pa-section {
-          margin-top: 22px;
-          border-radius: 18px;
-          overflow: hidden;
-          border: 1px solid rgba(0, 0, 0, 0.06);
-          box-shadow: 0 20px 60px rgba(0, 0, 0, 0.06);
-          background: #fff;
-        }
+          <Typography
+            sx={{
+              mx: "auto",
+              maxWidth: 900,
+              color: alpha(BRAND.grey, 0.95),
+              lineHeight: 1.75,
+              mb: 2.25,
+              fontSize: { xs: 14.75, md: 16.5 },
+            }}
+          >
+            {description}
+          </Typography>
 
-        .pa-section__pad {
-          padding: 22px 20px;
-        }
+          <Stack direction={{ xs: "column", sm: "row" }} justifyContent="center" gap={1.5}>
+            <PulseButton component={Link} href="/service" endIcon={<ArrowForwardIosRoundedIcon />}>
+              Ir al catálogo
+            </PulseButton>
 
-        /* ===== Header sección ===== */
-        .pa-secHead {
-          display: flex;
-          align-items: flex-start;
-          justify-content: space-between;
-          gap: 14px;
-          margin-bottom: 14px;
-        }
+            {/* <Button
+              variant="outlined"
+              startIcon={<WhatsAppIcon />}
+              sx={{
+                borderRadius: 2.5,
+                fontWeight: 950,
+                textTransform: "none",
+                px: { xs: 2.6, md: 3 },
+                py: { xs: 1.2, md: 1.35 },
+                borderColor: alpha(BRAND.accent, 0.45),
+                color: BRAND.accent,
+                "&:hover": {
+                  borderColor: BRAND.accent,
+                  bgcolor: alpha(BRAND.soft, 0.55),
+                },
+              }}
+            >
+              WhatsApp
+            </Button> */}
+          </Stack>
+        </Box>
 
-        .pa-h2 {
-          margin: 0;
-          font-family: var(--seacab-font-two);
-          font-weight: 900;
-          font-size: 22px;
-          letter-spacing: -0.2px;
-        }
+        {/* ================= SECCIÓN 1 ================= */}
+        <LandingSection
+          flip={false}
+          anim="slideLeft"
+          kicker="Somos"
+          title="Compra seguro, rápido y sin vueltas."
+          subtitle="Asesoría humana por WhatsApp, promociones VIP y productos listos para envío. Aquí vienes a elegir y salir oliendo bien, no a sufrir."
+          mediaSrc={imgExplora}
+          mediaAlt="Explora"
+          mediaPos="center 35%"
+        >
+          <BenefitBox
+            icon={<LocalOfferOutlinedIcon />}
+            title="Promos VIP reales"
+            desc="Promociones por temporada y mejores precios para recompra. Nada de “descuento fantasma”."
+          />
 
-        .pa-sub {
-          margin: 6px 0 0;
-          color: rgba(var(--seacab-gray-rgb), 1);
-          line-height: 1.55;
-          font-size: 14px;
-          max-width: 70ch;
-        }
+          <FeatureList
+            items={[
+              {
+                icon: <WhatsAppIcon />,
+                title: "Atención por WhatsApp (humano)",
+                desc: "Te guiamos para elegir, cotizar y cerrar la compra sin complicarte.",
+              },
+              {
+                icon: <Inventory2OutlinedIcon />,
+                title: "Existencia lista para salir",
+                desc: "Inventario disponible para envío rápido (sin historias raras).",
+              },
+              {
+                icon: <VerifiedOutlinedIcon />,
+                title: "Confianza",
+                desc: "Productos originales, sellados y verificados.",
+              },
+            ]}
+          />
 
-        .pa-secCta {
-          background: rgba(var(--seacab-base-rgb), 0.12);
-          color: var(--seacab-base);
-          text-decoration: none;
-          font-weight: 900;
-          padding: 10px 12px;
-          border-radius: 999px;
-          display: inline-flex;
-          align-items: center;
-          gap: 10px;
-          transition: transform 160ms ease, background 160ms ease;
-          white-space: nowrap;
-        }
+          {/* <Box sx={{ mt: 2 }}>
+            <PulseButton component={Link} href="/service" endIcon={<ArrowForwardIosRoundedIcon />}>
+              Ver catálogo
+            </PulseButton>
+          </Box> */}
+        </LandingSection>
 
-        .pa-secCta:hover {
-          transform: translateY(-1px);
-          background: rgba(var(--seacab-base-rgb), 0.18);
-        }
+        {/* ================= SECCIÓN 2: CATEGORÍAS ================= */}
+        <Box
+          component="section"
+          sx={{
+            borderRadius: 3.5,
+            background: alpha(BRAND.white, 0.92),
+            border: `1px solid ${alpha(BRAND.accent, 0.16)}`,
+            boxShadow: "0 22px 70px rgba(0,0,0,0.08)",
+            px: { xs: 2.25, md: 3.25 },
+            py: { xs: 2.5, md: 3 },
+            mb: 3,
+            animation: "paFadeUp 700ms ease both",
+            "@keyframes paFadeUp": {
+              from: { opacity: 0, transform: "translateY(12px)" },
+              to: { opacity: 1, transform: "translateY(0)" },
+            },
+            "@media (prefers-reduced-motion: reduce)": { animation: "none" },
+          }}
+        >
+          <Stack spacing={1} alignItems="center" sx={{ textAlign: "center" }}>
+            <Chip
+              icon={<CategoryOutlinedIcon />}
+              label="Categorías"
+              variant="outlined"
+              sx={{
+                fontWeight: 950,
+                bgcolor: alpha(BRAND.accent, 0.10),
+                borderColor: alpha(BRAND.accent, 0.20),
+              }}
+            />
+            <Typography
+              sx={{
+                fontWeight: 950,
+                letterSpacing: -0.4,
+                fontSize: { xs: 22, md: 30 },
+                color: "#111",
+              }}
+            >
+              Explora lo más buscado
+            </Typography>
+            <Typography sx={{ color: alpha(BRAND.grey, 0.95), maxWidth: 860, lineHeight: 1.75 }}>
+              Elige una categoría y entra directo al catálogo. Rápido, claro, sin perder tiempo.
+            </Typography>
+          </Stack>
 
-        .pa-secCta__dot {
-          width: 10px;
-          height: 10px;
-          border-radius: 999px;
-          background: var(--seacab-base);
-          box-shadow: 0 0 0 0 rgba(var(--seacab-base-rgb), 0.40);
-          animation: paPulse 1.8s ease-in-out infinite;
-        }
-
-        @keyframes paPulse {
-          0% { box-shadow: 0 0 0 0 rgba(var(--seacab-base-rgb), 0.38); }
-          70% { box-shadow: 0 0 0 10px rgba(var(--seacab-base-rgb), 0); }
-          100% { box-shadow: 0 0 0 0 rgba(var(--seacab-base-rgb), 0); }
-        }
-
-        /* ===== Media banner (carrusel) ===== */
-        .pa-media {
-          width: 100%;
-          height: 220px;
-          background: rgba(var(--seacab-soft-pink-rgb), 0.35);
-          position: relative;
-          overflow: hidden;
-        }
-
-        .pa-media__img {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-          display: block;
-          transform: scale(1);
-          transition: transform 650ms ease;
-        }
-
-        .pa-section:hover .pa-media__img {
-          transform: scale(1.03);
-        }
-
-        /* ===== HERO (promesa principal) ===== */
-        .pa-hero {
-          border-radius: 18px;
-          overflow: hidden;
-          border: 1px solid rgba(0, 0, 0, 0.06);
-          box-shadow: 0 20px 60px rgba(0, 0, 0, 0.06);
-          background: linear-gradient(
-            180deg,
-            rgba(var(--seacab-soft-pink-rgb), 0.55),
-            rgba(255, 255, 255, 1)
-          );
-          padding: 26px 20px;
-          position: relative;
-        }
-
-        .pa-hero::before {
-          content: "";
-          position: absolute;
-          inset: -120px -120px auto auto;
-          width: 260px;
-          height: 260px;
-          border-radius: 999px;
-          background: radial-gradient(
-            circle,
-            rgba(var(--seacab-base-rgb), 0.30),
-            rgba(var(--seacab-base-rgb), 0.0) 60%
-          );
-        }
-
-        .pa-heroGrid {
-          position: relative;
-          z-index: 1;
-          display: grid;
-          grid-template-columns: 1.2fr 0.8fr;
-          gap: 18px;
-          align-items: center;
-        }
-
-        .pa-kicker {
-          display: inline-flex;
-          align-items: center;
-          gap: 10px;
-          padding: 8px 12px;
-          border-radius: 999px;
-          background: rgba(var(--seacab-base-rgb), 0.10);
-          color: var(--seacab-base);
-          font-weight: 900;
-          font-size: 13px;
-          letter-spacing: 0.3px;
-          width: fit-content;
-        }
-
-        .pa-title {
-          margin: 14px 0 10px;
-          font-family: var(--seacab-font-two);
-          font-weight: 900;
-          font-size: 38px;
-          line-height: 1.08;
-          letter-spacing: -0.6px;
-        }
-
-        .pa-desc {
-          margin: 0;
-          font-size: 16.5px;
-          line-height: 1.6;
-          color: rgba(var(--seacab-gray-rgb), 1);
-          max-width: 60ch;
-        }
-
-        .pa-actions {
-          margin-top: 16px;
-          display: flex;
-          gap: 12px;
-          flex-wrap: wrap;
-          align-items: center;
-        }
-
-        .pa-btn {
-          background: var(--seacab-base);
-          color: #fff;
-          font-weight: 900;
-          letter-spacing: 0.2px;
-          padding: 14px 22px;
-          border-radius: 14px;
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          gap: 10px;
-          text-decoration: none;
-          position: relative;
-          overflow: hidden;
-          box-shadow: 0 16px 38px rgba(var(--seacab-base-rgb), 0.35),
-            0 8px 18px rgba(0, 0, 0, 0.12);
-          animation: paBreath 2.4s ease-in-out infinite;
-          transition: transform 160ms ease, box-shadow 160ms ease, filter 160ms ease;
-        }
-
-        .pa-btn::before {
-          content: "";
-          position: absolute;
-          top: -40%;
-          left: -60%;
-          width: 55%;
-          height: 180%;
-          transform: rotate(20deg);
-          background: linear-gradient(
-            to right,
-            rgba(255, 255, 255, 0),
-            rgba(255, 255, 255, 0.35),
-            rgba(255, 255, 255, 0)
-          );
-          opacity: 0;
-        }
-
-        .pa-btn:hover {
-          animation: none;
-          transform: translateY(-2px) scale(1.02);
-          filter: saturate(1.05);
-          box-shadow: 0 22px 48px rgba(var(--seacab-base-rgb), 0.48),
-            0 10px 24px rgba(0, 0, 0, 0.14);
-        }
-
-        .pa-btn:hover::before {
-          opacity: 1;
-          animation: paSheen 900ms ease forwards;
-        }
-
-        @keyframes paBreath {
-          0%,
-          100% { transform: translateY(0) scale(1); }
-          50% { transform: translateY(-1px) scale(1.02); }
-        }
-
-        @keyframes paSheen {
-          0% { left: -60%; }
-          100% { left: 130%; }
-        }
-
-        .pa-badgeBox {
-          display: grid;
-          gap: 10px;
-          align-content: start;
-        }
-
-        .pa-badge {
-          border-radius: 14px;
-          padding: 12px 14px;
-          background: rgba(255, 255, 255, 0.88);
-          border: 1px solid rgba(0, 0, 0, 0.05);
-          box-shadow: 0 14px 28px rgba(0, 0, 0, 0.06);
-        }
-
-        .pa-badgeTitle {
-          display: flex;
-          align-items: center;
-          gap: 10px;
-          font-weight: 900;
-          margin: 0 0 4px;
-          font-size: 14px;
-        }
-
-        .pa-badgeDesc {
-          margin: 0;
-          color: rgba(var(--seacab-gray-rgb), 1);
-          font-size: 13.5px;
-          line-height: 1.5;
-        }
-
-        /* ===== Grids / Cards ===== */
-        .pa-grid6 {
-          display: grid;
-          grid-template-columns: repeat(3, 1fr);
-          gap: 14px;
-        }
-
-        .pa-card {
-          border-radius: 16px;
-          padding: 16px;
-          background: #fff;
-          border: 1px solid rgba(0, 0, 0, 0.06);
-          box-shadow: 0 16px 30px rgba(0, 0, 0, 0.05);
-          transition: transform 180ms ease, box-shadow 180ms ease;
-        }
-
-        .pa-card:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 22px 44px rgba(0, 0, 0, 0.07);
-        }
-
-        .pa-cardIcon {
-          font-size: 22px;
-        }
-
-        .pa-cardTitle {
-          margin: 10px 0 6px;
-          font-weight: 900;
-          font-size: 15px;
-        }
-
-        .pa-cardDesc {
-          margin: 0;
-          color: rgba(var(--seacab-gray-rgb), 1);
-          font-size: 13.5px;
-          line-height: 1.55;
-        }
-
-        .pa-row2 {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 14px;
-        }
-
-        .pa-panel {
-          border-radius: 16px;
-          padding: 16px;
-          background: rgba(var(--seacab-soft-pink-rgb), 0.45);
-          border: 1px solid rgba(var(--seacab-base-rgb), 0.15);
-        }
-
-        .pa-list {
-          list-style: none;
-          padding: 0;
-          margin: 0;
-          display: grid;
-          gap: 10px;
-        }
-
-        .pa-li {
-          display: flex;
-          gap: 10px;
-          align-items: flex-start;
-          padding: 10px 12px;
-          border-radius: 14px;
-          background: rgba(255, 255, 255, 0.9);
-          border: 1px solid rgba(0, 0, 0, 0.05);
-        }
-
-        .pa-liIcon {
-          font-size: 18px;
-          margin-top: 2px;
-        }
-
-        .pa-liTitle {
-          margin: 0;
-          font-weight: 900;
-          font-size: 14px;
-        }
-
-        .pa-liDesc {
-          margin: 2px 0 0;
-          font-size: 13.5px;
-          color: rgba(var(--seacab-gray-rgb), 1);
-          line-height: 1.5;
-        }
-
-        /* ===== Animaciones entrada ===== */
-        .pa-fadeUp {
-          opacity: 0;
-          transform: translateY(14px);
-          transition: opacity 700ms ease, transform 700ms ease;
-        }
-        .pa-fadeUp.on {
-          opacity: 1;
-          transform: translateY(0);
-        }
-
-        .pa-stagger > * {
-          opacity: 0;
-          transform: translateY(12px);
-          transition: opacity 650ms ease, transform 650ms ease;
-        }
-        .pa-stagger.on > * {
-          opacity: 1;
-          transform: translateY(0);
-        }
-        .pa-stagger.on > *:nth-child(1) { transition-delay: 60ms; }
-        .pa-stagger.on > *:nth-child(2) { transition-delay: 120ms; }
-        .pa-stagger.on > *:nth-child(3) { transition-delay: 180ms; }
-        .pa-stagger.on > *:nth-child(4) { transition-delay: 240ms; }
-        .pa-stagger.on > *:nth-child(5) { transition-delay: 300ms; }
-        .pa-stagger.on > *:nth-child(6) { transition-delay: 360ms; }
-
-        /* ===== Responsive ===== */
-        @media (max-width: 991px) {
-          .pa-heroGrid {
-            grid-template-columns: 1fr;
-          }
-          .pa-title {
-            font-size: 30px;
-          }
-          .pa-grid6 {
-            grid-template-columns: repeat(2, 1fr);
-          }
-          .pa-row2 {
-            grid-template-columns: 1fr;
-          }
-          .pa-media {
-            height: 190px;
-          }
-          .pa-secHead {
-            flex-direction: column;
-            align-items: flex-start;
-          }
-        }
-
-        @media (max-width: 520px) {
-          .pa-grid6 {
-            grid-template-columns: 1fr;
-          }
-          .pa-btn {
-            width: 100%;
-          }
-          .pa-media {
-            height: 170px;
-          }
-        }
-      `}</style>
-
-      <section className="pa-page">
-        <div className="pa-wrap">
-          {/* ===== SECCIÓN 1: HERO / PROMESA ===== */}
-          <div ref={heroRef} className={`pa-hero pa-fadeUp ${heroIn ? "on" : ""}`}>
-            <div className="pa-heroGrid">
-              <div>
-                <div className="pa-kicker">✅ 100% Originales · 🚚 Envío Nacional · 💬 WhatsApp</div>
-                <h2 className="pa-title">{titulo}</h2>
-                <p className="pa-desc">{descripcion}</p>
-
-                <div className="pa-actions">
-                  <Link href="/service" className="pa-btn">
-                    🛍️ Compra ahora
-                  </Link>
-                </div>
-              </div>
-
-              <div className="pa-badgeBox">
-                {bullets.map((b, i) => (
-                  <div key={i} className="pa-badge">
-                    <p className="pa-badgeTitle">
-                      <span>{b.icon}</span> {b.title}
-                    </p>
-                    <p className="pa-badgeDesc">{b.desc}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* ===== SECCIÓN 2: EXPLORA ===== */}
-          <div ref={exploreRef} className={`pa-section pa-fadeUp ${exploreIn ? "on" : ""}`}>
-            <SectionMedia src={car.explore} alt="Explora lo más buscado" position="center 40%" />
-
-            <div className="pa-section__pad">
-              <SectionHeader
-                title="Explora lo más buscado"
-                subtitle="Categorías clave para que el visitante entienda en segundos qué vendes y a dónde entrar."
-                ctaHref="/service"
-                ctaLabel="Ver catálogo"
+          <Box
+            sx={{
+              mt: 2,
+              display: "flex",
+              flexWrap: "wrap",
+              gap: 1,
+              justifyContent: "center",
+            }}
+          >
+            {categorias.map((c) => (
+              <Chip
+                key={c}
+                label={c}
+                variant="outlined"
+                sx={{
+                  fontWeight: 900,
+                  borderColor: alpha(BRAND.accent, 0.25),
+                  bgcolor: alpha(BRAND.soft, 0.45),
+                  color: "#222",
+                  "&:hover": { bgcolor: alpha(BRAND.soft, 0.75) },
+                }}
               />
+            ))}
+          </Box>
 
-              <div className={`pa-grid6 pa-stagger ${exploreIn ? "on" : ""}`}>
-                {categories.map((c, i) => (
-                  <div key={i} className="pa-card">
-                    <div className="pa-cardIcon">{c.icon}</div>
-                    <h4 className="pa-cardTitle">{c.title}</h4>
-                    <p className="pa-cardDesc">{c.desc}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
+          <Box sx={{ mt: 2.25, display: "flex", justifyContent: "center" }}>
+            <PulseButton component={Link} href="/service" endIcon={<ArrowForwardIosRoundedIcon />}>
+              Entrar al catálogo
+            </PulseButton>
+          </Box>
+        </Box>
 
-          {/* ===== SECCIÓN 3: GARANTÍA Y SOPORTE ===== */}
-          <div ref={warrantyRef} className={`pa-section pa-fadeUp ${warrantyIn ? "on" : ""}`}>
-            <SectionMedia src={car.warranty} alt="Garantía y soporte" position="center 35%" />
+        {/* ================= SECCIÓN 3: ENVÍOS ================= */}
+        <LandingSection
+          flip
+          anim="slideRight"
+          kicker="Envíos"
+          title="Envíos a todo México."
+          subtitle="Cobertura nacional y opciones locales. Te decimos costos y tiempos por WhatsApp y listo."
+          mediaSrc={imgEnvios}
+          mediaAlt="Envíos"
+          mediaPos="center 45%"
+        >
+          <BenefitBox
+            icon={<LocalShippingOutlinedIcon />}
+            title="Logística clara"
+            desc="Te compartimos tiempos estimados y opciones según tu zona. Sin misterio."
+          />
 
-            <div className="pa-section__pad">
-              <SectionHeader
-                title="Garantía & soporte"
-                subtitle="Originalidad asegurada y soporte humano por WhatsApp."
-                ctaHref="/service"
-                ctaLabel="Compra con confianza"
-              />
+          <FeatureList
+            items={[
+              {
+                icon: <LocalShippingOutlinedIcon />,
+                title: "República Mexicana",
+                desc: "Entrega estimada: 2 a 5 días hábiles (según paquetería).",
+              },
+              {
+                icon: <LocationOnOutlinedIcon />,
+                title: "Tapachula",
+                desc: "Entrega local mismo día o al siguiente (según zona y horario).",
+              },
+              {
+                icon: <RequestQuoteOutlinedIcon />,
+                title: "Entrega / Recogida",
+                desc: "Coordinación directa por WhatsApp.",
+              },
+            ]}
+          />
+        </LandingSection>
 
-              <div className="pa-row2">
-                <div className="pa-panel">
-                  <h4 className="pa-cardTitle" style={{ marginTop: 0 }}>
-                    Garantía & reglas claras
-                  </h4>
-                  <ul className="pa-list">
-                    <li className="pa-li">
-                      <span className="pa-liIcon">🔒</span>
-                      <div>
-                        <p className="pa-liTitle">Garantía de autenticidad</p>
-                        <p className="pa-liDesc">Productos originales, sellados y verificados.</p>
-                      </div>
-                    </li>
-                    <li className="pa-li">
-                      <span className="pa-liIcon">📲</span>
-                      <div>
-                        <p className="pa-liTitle">Soporte directo por WhatsApp</p>
-                        <p className="pa-liDesc">Atención humana en todo momento.</p>
-                      </div>
-                    </li>
-                    <li className="pa-li">
-                      <span className="pa-liIcon">ℹ️</span>
-                      <div>
-                        <p className="pa-liTitle">Sin cambios/devoluciones</p>
-                        <p className="pa-liDesc">
-                          No aplica por ser producto de uso personal (perfumes).
-                        </p>
-                      </div>
-                    </li>
-                  </ul>
-                </div>
+        {/* ================= SECCIÓN 4: PAGOS ================= */}
+        <LandingSection
+          flip={false}
+          anim="zoomIn"
+          kicker="Pagos"
+          title="Paga como te convenga."
+          subtitle="Opciones simples y directas. Menos fricción, más perfume."
+          mediaSrc={imgPagos}
+          mediaAlt="Pagos"
+          mediaPos="center 40%"
+        >
+          <BenefitBox
+            icon={<PaymentsOutlinedIcon />}
+            title="Métodos claros"
+            desc="Te confirmamos el método, el total y listo. Sin sorpresas."
+          />
 
-                <div className="pa-panel">
-                  <h4 className="pa-cardTitle" style={{ marginTop: 0 }}>
-                    Reseñas reales
-                  </h4>
-                  <ul className="pa-list">
-                    <li className="pa-li">
-                      <span className="pa-liIcon">💬</span>
-                      <div>
-                        <p className="pa-liTitle">WhatsApp & Facebook</p>
-                        <p className="pa-liDesc">Recomendaciones directas de clientes.</p>
-                      </div>
-                    </li>
-                    <li className="pa-li">
-                      <span className="pa-liIcon">🧾</span>
-                      <div>
-                        <p className="pa-liTitle">Grupos de ventas</p>
-                        <p className="pa-liDesc">Comentarios auténticos en publicaciones.</p>
-                      </div>
-                    </li>
-                    <li className="pa-li">
-                      <span className="pa-liIcon">🎨</span>
-                      <div>
-                        <p className="pa-liTitle">Testimonios visuales</p>
-                        <p className="pa-liDesc">
-                          Convertimos capturas en tarjetas bonitas cuando quieras.
-                        </p>
-                      </div>
-                    </li>
-                  </ul>
-                </div>
-              </div>
+          <FeatureList
+            items={[
+              {
+                icon: <AccountBalanceOutlinedIcon />,
+                title: "Transferencia o depósito",
+                desc: "Rápido, directo y sin vueltas.",
+              },
+              {
+                icon: <PaymentsOutlinedIcon />,
+                title: "Efectivo",
+                desc: "Ideal para entrega local o acuerdos directos.",
+              },
+              {
+                icon: <CreditCardOutlinedIcon />,
+                title: "Tarjeta / Apartado",
+                desc: "Tarjeta puede aplicar comisión. Apartado con anticipo en productos seleccionados.",
+              },
+            ]}
+          />
+        </LandingSection>
 
-              <div style={{ textAlign: "center", marginTop: 16 }}>
-                <Link href="/service" className="pa-btn">
-                  ✅ Ver perfumes disponibles
-                </Link>
-              </div>
-            </div>
-          </div>
+        {/* ================= SECCIÓN 5: GARANTÍA ================= */}
+        <LandingSection
+          flip
+          anim="pop"
+          kicker="Confianza"
+          title="Autenticidad y soporte."
+          subtitle="Productos originales y atención real. Políticas claras desde el inicio."
+          mediaSrc={imgGarantia}
+          mediaAlt="Garantía"
+          mediaPos="center 35%"
+        >
+          <BenefitBox
+            icon={<VerifiedOutlinedIcon />}
+            title="Compra con confianza"
+            desc="Sellados y verificados. Te orientamos antes de comprar para evitar dudas."
+          />
 
-          {/* ===== SECCIÓN 4: ENVÍOS ===== */}
-          <div ref={shippingRef} className={`pa-section pa-fadeUp ${shippingIn ? "on" : ""}`}>
-            <SectionMedia src={car.shipping} alt="Envíos" position="center 35%" />
+          <FeatureList
+            items={[
+              {
+                icon: <VerifiedOutlinedIcon />,
+                title: "Autenticidad garantizada",
+                desc: "Productos originales, sellados y verificados.",
+              },
+              {
+                icon: <SupportAgentOutlinedIcon />,
+                title: "Soporte por WhatsApp",
+                desc: "Te ayudamos antes, durante y después de tu compra.",
+              },
+              {
+                icon: <BlockOutlinedIcon />,
+                title: "Sin devoluciones",
+                desc: "Por tratarse de producto de uso personal. Te orientamos antes de comprar.",
+              },
+            ]}
+          />
+        </LandingSection>
 
-            <div className="pa-section__pad">
-              <SectionHeader
-                title="Envíos"
-                subtitle="Rápido en Tapachula y envíos nacionales a toda la República."
-                ctaHref="/service"
-                ctaLabel="Comprar ahora"
-              />
+        {/* ================= CTA FINAL ================= */}
+        <Box
+          component="section"
+          sx={{
+            borderRadius: 3.5,
+            background: alpha(BRAND.white, 0.92),
+            border: `1px solid ${alpha(BRAND.accent, 0.16)}`,
+            boxShadow: "0 22px 70px rgba(0,0,0,0.10)",
+            px: { xs: 2.25, md: 3.5 },
+            py: { xs: 2.75, md: 3.25 },
+            textAlign: "center",
+            animation: "paFadeUp 700ms ease both",
+            "@keyframes paFadeUp": {
+              from: { opacity: 0, transform: "translateY(12px)" },
+              to: { opacity: 1, transform: "translateY(0)" },
+            },
+            "@media (prefers-reduced-motion: reduce)": { animation: "none" },
+          }}
+        >
+          <Typography
+            sx={{
+              fontWeight: 950,
+              letterSpacing: -0.4,
+              fontSize: { xs: 22, md: 30 },
+              color: "#111",
+              mb: 1,
+            }}
+          >
+            ¿Listo para elegir tu aroma?
+          </Typography>
 
-              <div className="pa-panel">
-                <ul className="pa-list">
-                  {shipping.map((s, i) => (
-                    <li key={i} className="pa-li">
-                      <span className="pa-liIcon">{s.icon}</span>
-                      <div>
-                        <p className="pa-liTitle">{s.title}</p>
-                        <p className="pa-liDesc">{s.desc}</p>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+          <Typography
+            sx={{
+              color: alpha(BRAND.grey, 0.95),
+              maxWidth: 860,
+              mx: "auto",
+              lineHeight: 1.75,
+              mb: 2.25,
+            }}
+          >
+            Entra al catálogo y compra en minutos. Si quieres recomendación, te atendemos por WhatsApp.
+          </Typography>
 
-              <div style={{ textAlign: "center", marginTop: 16 }}>
-                <Link href="/service" className="pa-btn">
-                  🚚 Ver catálogo para envío
-                </Link>
-              </div>
-            </div>
-          </div>
+          <Stack direction={{ xs: "column", sm: "row" }} justifyContent="center" gap={1.5}>
+            <PulseButton component={Link} href="/service" endIcon={<ArrowForwardIosRoundedIcon />}>
+              Ir al catálogo
+            </PulseButton>
 
-          {/* ===== SECCIÓN 5: MÉTODOS DE PAGO ===== */}
-          <div ref={paymentsRef} className={`pa-section pa-fadeUp ${paymentsIn ? "on" : ""}`}>
-            <SectionMedia src={car.payments} alt="Métodos de pago" position="center 40%" />
-
-            <div className="pa-section__pad">
-              <SectionHeader
-                title="Métodos de pago"
-                subtitle="Elige el método que te convenga y te guiamos por WhatsApp si lo necesitas."
-                ctaHref="/service"
-                ctaLabel="Comprar"
-              />
-
-              <div className="pa-panel">
-                <ul className="pa-list">
-                  {payments.map((p, i) => (
-                    <li key={i} className="pa-li">
-                      <span className="pa-liIcon">{p.icon}</span>
-                      <div>
-                        <p className="pa-liTitle">
-                          {p.title}
-                          {p.note ? (
-                            <span style={{ color: "rgba(var(--seacab-gray-rgb),1)", fontWeight: 800 }}>
-                              {" "}
-                              · {p.note}
-                            </span>
-                          ) : null}
-                        </p>
-                        <p className="pa-liDesc">
-                          Confirmamos el pago y avanzas a la compra sin complicarte la vida.
-                        </p>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <div style={{ textAlign: "center", marginTop: 16 }}>
-                <Link href="/service" className="pa-btn">
-                  💳 Comprar ahora
-                </Link>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-    </>
+            <Button
+              variant="outlined"
+              startIcon={<WhatsAppIcon />}
+              sx={{
+                borderRadius: 2.5,
+                fontWeight: 950,
+                textTransform: "none",
+                px: { xs: 2.6, md: 3 },
+                py: { xs: 1.2, md: 1.35 },
+                borderColor: alpha(BRAND.accent, 0.45),
+                color: BRAND.accent,
+                "&:hover": {
+                  borderColor: BRAND.accent,
+                  bgcolor: alpha(BRAND.soft, 0.55),
+                },
+              }}
+            >
+              Hablar por WhatsApp
+            </Button>
+          </Stack>
+        </Box>
+      </Container>
+    </Box>
   );
 }
