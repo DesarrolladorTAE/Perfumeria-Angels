@@ -214,7 +214,7 @@ export default function HeroTwo() {
             <div className="pa-hero__inner">
               {/* <h1 className="pa-hero__title">{title}</h1>
               <p className="pa-hero__desc">{description}</p> */}
-              <Link href="/service" className="pa-hero__btn">
+              <Link href="/tienda" className="pa-hero__btn">
                 Compra ya
               </Link>
             </div>

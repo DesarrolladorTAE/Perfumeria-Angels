@@ -1,5 +1,6 @@
 import SEO from "../common/seo/Seo";
 import HeaderOne from "../common/header/HeaderOne";
+import HeroTwo from "@/components/hero/HeroTwo";
 import Breadcrumb from "../common/breadcrumb/Breadcrumb";
 import Tienda from "../components/hero/Tienda";
 import FooterOne from "../common/footer/FooterOne";
@@ -7,13 +8,15 @@ import FooterOne from "../common/footer/FooterOne";
 export default function ServicePage() {
 	return (
 		<>
-			<SEO pageTitle={"Service"} />
+			<SEO pageTitle={"Tienda"} />
 			<HeaderOne />
-			<Breadcrumb 
+			{/* <Breadcrumb 
                 heading="Service"
                 currentPage="Service" 
-            />
-		 	<Tienda /> 
+            /> */}
+			<HeroTwo/>
+
+		 	{/* <Tienda />  */}
 			<FooterOne />
 		</>
 	);

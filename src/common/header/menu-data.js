@@ -9,19 +9,19 @@ const menu_data = [
     id: 2,
     has_dropdown: false,
     title: "Tienda",
-    link: "/service", // tu "tienda" vive aquí
+    link: "/tienda", // tu "tienda" vive aquí
   },
   {
     id: 3,
     has_dropdown: false,
-    title: "Conócenos",
-    link: "/about",
+    title: "Sobre Nosotros",
+    link: "/sobre-nosotros",
   },
   {
     id: 4,
     has_dropdown: false,
     title: "Contáctanos",
-    link: "/contact",
+    link: "/contacto",
   },
 ];
 

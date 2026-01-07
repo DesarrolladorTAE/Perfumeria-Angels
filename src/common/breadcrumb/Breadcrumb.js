@@ -10,7 +10,7 @@ const Breadcrumb = ({heading = "About Us", currentPage = "About"}) => {
                     <div className="page-header__inner">
                         <h2>{heading}</h2>
                         <ul className="thm-breadcrumb list-unstyled">
-                            <li><Link href="/">Home</Link></li>
+                            <li><Link href="/">Inicio</Link></li>
                             <li><span>/</span></li>
                             <li className="active">{currentPage}</li>
                         </ul>

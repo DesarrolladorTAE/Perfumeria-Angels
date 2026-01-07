@@ -9,13 +9,13 @@ import FooterOne from "../common/footer/FooterOne";
 export default function ContactPage() {
 	return (
 		<>
-			<SEO pageTitle={"Contact.Page"} />
+			<SEO pageTitle={"Contáctanos"} />
 			<HeaderOne />
-			<Breadcrumb 
-                heading="Contact.Page"
-                currentPage="Contact" 
+			{/* <Breadcrumb 
+                heading="Contáctanos"
+                currentPage="Contáctanos" 
             />
-			<ContactTwo />
+			<ContactTwo /> */}
 			<ContactOne />
 			<BrandOne />
 			<FooterOne />
