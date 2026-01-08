@@ -142,7 +142,7 @@ const HeaderOne = () => {
                 <div className="main-menu-wrapper__logo">
                   <Link href="/">
                     <img
-                      src={sitio?.logo || "/assets/images/resources/logo-1.png"}
+                      src={sitio?.logo || "/assets/imags/resources/logo-1.png"}
                       alt={storeName}
                       style={{ height: 44, width: "auto" }}
                     />

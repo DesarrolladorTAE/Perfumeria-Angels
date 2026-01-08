@@ -17,7 +17,7 @@ export default function ContactPage() {
             />
 			<ContactTwo /> */}
 			<ContactOne />
-			<BrandOne />
+			{/* <BrandOne /> */}
 			<FooterOne />
 		</>
 	);

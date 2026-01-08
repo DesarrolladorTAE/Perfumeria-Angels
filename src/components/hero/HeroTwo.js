@@ -42,7 +42,7 @@ export default function HeroTwo() {
   const { store, sitio, carrusel } = usePublicSite();
 
   const desktopImg = useMemo(() => {
-    return toAbs(sitio?.img_portada) || "/assets/images/backgrounds/main-slider-bg.jpg";
+    return toAbs(sitio?.img_portada) || "/assets/imags/backgrounds/main-slider-bg.jpg";
   }, [sitio?.img_portada]);
 
   // ✅ Mobile: carrusel[0] (ej 480x700 o 480x500), si no existe usa portada
