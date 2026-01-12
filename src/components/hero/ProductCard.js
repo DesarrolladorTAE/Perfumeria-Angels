@@ -13,6 +13,12 @@ export default function ProductCard({ p, onOpen }) {
   const MEDIA_H = { xs: 132, sm: 145, md: 190 };
   const TITLE_LINES = 2;
 
+const handleOpen = React.useCallback(() => {
+  if (!p?.sku) return;
+  onOpen?.(p);
+}, [onOpen, p]);
+
+
   return (
     <Box
       sx={{
@@ -34,9 +40,14 @@ export default function ProductCard({ p, onOpen }) {
           transform: "translateY(-1px)",
         },
       }}
-      onClick={() => onOpen?.(p?.id)}
+      onClick={handleOpen}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") handleOpen();
+      }}
     >
-      {/* ===== BADGES (NEW primero, luego descuento) ===== */}
+      {/* ===== BADGES ===== */}
       {(p?.new || dc.has) && (
         <Stack
           spacing={0.4}
@@ -150,11 +161,6 @@ export default function ProductCard({ p, onOpen }) {
         {/* Rating */}
         <Stack direction="row" alignItems="center" spacing={0.6} sx={{ mt: 0.55 }}>
           <Rating size="small" value={Number(p?.rating || 0)} precision={0.5} readOnly />
-          {/* {p?.saleCount && (
-            <Typography sx={{ fontSize: 11, fontWeight: 800, color: alpha("#111", 0.55) }}>
-              ({p.saleCount})
-            </Typography>
-          )} */}
         </Stack>
 
         {/* Precio */}
@@ -177,7 +183,7 @@ export default function ProductCard({ p, onOpen }) {
           </Typography>
         </Stack>
 
-        {/* Botón */}
+        {/* Botón: abre detalle (coherente) */}
         <Button
           fullWidth
           variant="contained"
@@ -195,10 +201,10 @@ export default function ProductCard({ p, onOpen }) {
           }}
           onClick={(e) => {
             e.stopPropagation();
-            onOpen?.(p?.id);
+            handleOpen();
           }}
         >
-          Agregar al carrito
+          Ver detalle
         </Button>
       </Box>
     </Box>

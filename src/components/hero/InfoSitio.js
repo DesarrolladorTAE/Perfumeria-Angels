@@ -806,7 +806,7 @@ export default function InfoSitio() {
             <PulseButton component={Link} href="/tienda" endIcon={<ArrowForwardIosRoundedIcon />}>
               Ir al catálogo
             </PulseButton>
-
+{/* 
             <Button
               variant="outlined"
               startIcon={<WhatsAppIcon />}
@@ -825,7 +825,7 @@ export default function InfoSitio() {
               }}
             >
               Hablar por WhatsApp
-            </Button>
+            </Button> */}
           </Stack>
         </Box>
       </Container>
