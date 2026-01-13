@@ -24,9 +24,10 @@ import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import LocalOfferRoundedIcon from "@mui/icons-material/LocalOfferRounded";
 import AddShoppingCartRoundedIcon from "@mui/icons-material/AddShoppingCartRounded";
 import ShareRoundedIcon from "@mui/icons-material/ShareRounded";
-import ContentCopyRoundedIcon from "@mui/icons-material/ContentCopyRounded";
 
 import { PALETTE, calcDiscount, moneyMXN } from "@/utils/catalogUtils";
+import { useCart } from "@/context/CartContext";
+
 
 export default function DetailDialog({
   open,
@@ -40,6 +41,8 @@ export default function DetailDialog({
 }) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const { add } = useCart();
+
 
   // ✅ feedback de compartir/copiar
   const [toast, setToast] = React.useState({ open: false, msg: "", severity: "success" });
@@ -57,14 +60,15 @@ export default function DetailDialog({
     textMuted: { fontWeight: 800, color: alpha(PALETTE.grey, 0.72) },
   };
 
-const buildShareUrl = React.useCallback(() => {
-  const sku = detail?.sku;
-  if (!sku) return null;
-  if (typeof window === "undefined") return null;
+  // ✅ Link share para sitio estático (sin rebuild por SKU)
+  const buildShareUrl = React.useCallback(() => {
+    const sku = detail?.sku;
+    if (!sku) return null;
+    if (typeof window === "undefined") return null;
 
-  return `${window.location.origin}/tienda?sku=${encodeURIComponent(sku)}`;
-}, [detail?.sku]);
-
+    // ✅ ojo: sin slash extra antes del ?
+    return `${window.location.origin}/tienda?sku=${encodeURIComponent(sku)}`;
+  }, [detail?.sku]);
 
   const handleShare = React.useCallback(async () => {
     try {
@@ -99,35 +103,13 @@ const buildShareUrl = React.useCallback(() => {
       document.body.removeChild(el);
       setToast({ open: true, msg: "Link copiado ✅", severity: "success" });
     } catch (e) {
-      setToast({ open: true, msg: "No se pudo compartir. Intenta copiar el link.", severity: "error" });
+      setToast({
+        open: true,
+        msg: "No se pudo compartir. Intenta copiar el link.",
+        severity: "error",
+      });
     }
   }, [buildShareUrl, detail?.name, detail?.shortDescription]);
-
-  const handleCopy = React.useCallback(async () => {
-    try {
-      const url = buildShareUrl();
-      if (!url) {
-        setToast({ open: true, msg: "No pude generar el link (falta SKU).", severity: "warning" });
-        return;
-      }
-
-      if (navigator.clipboard?.writeText) {
-        await navigator.clipboard.writeText(url);
-        setToast({ open: true, msg: "Link copiado ✅", severity: "success" });
-        return;
-      }
-
-      const el = document.createElement("textarea");
-      el.value = url;
-      document.body.appendChild(el);
-      el.select();
-      document.execCommand("copy");
-      document.body.removeChild(el);
-      setToast({ open: true, msg: "Link copiado ✅", severity: "success" });
-    } catch (e) {
-      setToast({ open: true, msg: "No se pudo copiar el link.", severity: "error" });
-    }
-  }, [buildShareUrl]);
 
   return (
     <>
@@ -250,9 +232,8 @@ const buildShareUrl = React.useCallback(() => {
                             height: 64,
                             scrollSnapAlign: "start",
                             borderRadius: 2,
-                            border: `2px solid ${
-                              active ? PALETTE.accent : alpha(PALETTE.grey, 0.15)
-                            }`,
+                            border: `2px solid ${active ? PALETTE.accent : alpha(PALETTE.grey, 0.15)
+                              }`,
                             backgroundColor: PALETTE.white,
                             overflow: "hidden",
                             display: "flex",
@@ -345,7 +326,6 @@ const buildShareUrl = React.useCallback(() => {
                         ) : null}
                       </Stack>
 
-                      {/* DESCRIPCIONES */}
                       {detail.shortDescription ? (
                         <>
                           <Typography sx={{ fontWeight: 900, color: PALETTE.grey, fontSize: 14 }}>
@@ -443,25 +423,6 @@ const buildShareUrl = React.useCallback(() => {
             Compartir
           </Button>
 
-          {/* ✅ Copiar link directo (opcional, útil en desktop) */}
-          {!isMobile ? (
-            <Button
-              onClick={handleCopy}
-              variant="outlined"
-              startIcon={<ContentCopyRoundedIcon />}
-              disabled={!detail || detailLoading || !!detailErr || !detail?.sku}
-              sx={{
-                borderRadius: 2,
-                fontWeight: 900,
-                textTransform: "none",
-                borderColor: alpha(PALETTE.grey, 0.25),
-                color: PALETTE.grey,
-              }}
-            >
-              Copiar link
-            </Button>
-          ) : null}
-
           <Button
             variant="contained"
             startIcon={<AddShoppingCartRoundedIcon />}
@@ -476,9 +437,13 @@ const buildShareUrl = React.useCallback(() => {
             }}
             onClick={() => {
               if (!detail) return;
-              onAddToCart?.(detail);
+
+              add(detail, 1); // ✅ agrega al carrito (usa tu contexto con localStorage)
+              setToast({ open: true, msg: "Agregado al carrito ✅", severity: "success" });
+
               onClose?.();
             }}
+
           >
             Agregar al carrito
           </Button>

@@ -2,9 +2,14 @@ import * as React from "react";
 import { Box, Button, Chip, Rating, Stack, Typography, alpha } from "@mui/material";
 import LocalOfferRoundedIcon from "@mui/icons-material/LocalOfferRounded";
 import NewReleasesRoundedIcon from "@mui/icons-material/NewReleasesRounded";
+import AddShoppingCartRoundedIcon from "@mui/icons-material/AddShoppingCartRounded";
+
 import { PALETTE, calcDiscount, moneyMXN, pickCover } from "@/utils/catalogUtils";
+import { useCart } from "@/context/CartContext";
 
 export default function ProductCard({ p, onOpen }) {
+  const { add } = useCart();
+
   const cover = pickCover(p?.image);
   const dc = calcDiscount(p?.price, p?.discount);
 
@@ -13,11 +18,18 @@ export default function ProductCard({ p, onOpen }) {
   const MEDIA_H = { xs: 132, sm: 145, md: 190 };
   const TITLE_LINES = 2;
 
-const handleOpen = React.useCallback(() => {
-  if (!p?.sku) return;
-  onOpen?.(p);
-}, [onOpen, p]);
+  const handleOpen = React.useCallback(() => {
+    if (!p?.sku) return;
+    onOpen?.(p);
+  }, [onOpen, p]);
 
+  const handleAdd = React.useCallback(
+    (e) => {
+      e.stopPropagation(); // ✅ evita abrir detalle
+      add(p, 1);           // ✅ agrega 1 al carrito
+    },
+    [add, p]
+  );
 
   return (
     <Box
@@ -95,13 +107,7 @@ const handleOpen = React.useCallback(() => {
       )}
 
       {/* ===== MEDIA ===== */}
-      <Box
-        sx={{
-          height: MEDIA_H,
-          bgcolor: "#fff",
-          overflow: "hidden",
-        }}
-      >
+      <Box sx={{ height: MEDIA_H, bgcolor: "#fff", overflow: "hidden" }}>
         {cover ? (
           <img
             src={cover}
@@ -183,10 +189,11 @@ const handleOpen = React.useCallback(() => {
           </Typography>
         </Stack>
 
-        {/* Botón: abre detalle (coherente) */}
+        {/* ✅ Botón: Agregar al carrito (no abre detalle) */}
         <Button
           fullWidth
           variant="contained"
+          startIcon={<AddShoppingCartRoundedIcon />}
           sx={{
             mt: "auto",
             borderRadius: 1.4,
@@ -199,12 +206,9 @@ const handleOpen = React.useCallback(() => {
             boxShadow: "none",
             "&:hover": { bgcolor: "#000" },
           }}
-          onClick={(e) => {
-            e.stopPropagation();
-            handleOpen();
-          }}
+          onClick={handleAdd}
         >
-          Ver detalle
+          Agregar al carrito
         </Button>
       </Box>
     </Box>
