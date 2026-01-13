@@ -10,12 +10,12 @@ export default function ErrorPage() {
 		<>
 			<SEO pageTitle={"404 Page"} />
 			<HeaderOne />
-			<Breadcrumb 
+			{/* <Breadcrumb 
                 heading="404 Page"
                 currentPage="404" 
-            />
+            /> */}
 			<ErrorContent />
-			<BrandOne />
+			{/* <BrandOne /> */}
 			<FooterOne />
 		</>
 	);

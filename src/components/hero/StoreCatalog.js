@@ -222,6 +222,8 @@ const openProduct = React.useCallback(
 );
 
 
+
+
   // ✅ cerrar: volver a /tienda
 const closeDetail = React.useCallback(() => {
   router.push("/tienda", undefined, { shallow: true });

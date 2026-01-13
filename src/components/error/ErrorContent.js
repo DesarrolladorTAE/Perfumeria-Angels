@@ -13,7 +13,7 @@ const ErrorContent = () => {
 									<img src="/assets/images/resources/error-page-img-1.png" alt="" />
 								</div>
 								<div className="error-page__btn-box">
-									<Link href="/" className="thm-btn error-page__btn">Go To Home</Link>
+									<Link href="/" className="thm-btn error-page__btn">Ir al Inicio</Link>
 								</div>
 							</div>
 						</div>

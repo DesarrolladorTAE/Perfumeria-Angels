@@ -2,11 +2,12 @@
 const nextConfig = {
   reactStrictMode: true,
 
-  // Si estás exportando estático:
+  // export estático
   output: "export",
+  trailingSlash: true,          // ✅ CLAVE para que /tienda/ funcione
+
   images: { unoptimized: true },
 
-  // ✅ Evita que ESLint rompa/ensucie el build
   eslint: {
     ignoreDuringBuilds: true,
   },
