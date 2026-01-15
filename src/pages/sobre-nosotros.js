@@ -4,6 +4,7 @@ import HeroTwo from "@/components/hero/HeroTwo";
 import Breadcrumb from "../common/breadcrumb/Breadcrumb";
 import AboutTwo from "../components/about/AboutTwo";
 import TopAnnouncementMarquee from "@/components/hero/TopAnnouncementBar";
+import InfoSitio from "@/components/hero/InfoSitio";
 
 import FooterOne from "../common/footer/FooterOne";
 
@@ -20,6 +21,8 @@ export default function AboutPage() {
 			<TopAnnouncementMarquee/>
 
 			<HeroTwo/>
+
+			<InfoSitio/>
 			<AboutTwo />
 			<FooterOne />
 		</>

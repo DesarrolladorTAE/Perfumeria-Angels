@@ -26,6 +26,7 @@ import WhatsAppIcon from "@mui/icons-material/WhatsApp";
 import LocalMallRoundedIcon from "@mui/icons-material/LocalMallRounded";
 import EmailRoundedIcon from "@mui/icons-material/EmailRounded";
 import PersonRoundedIcon from "@mui/icons-material/PersonRounded";
+import LocationOnRoundedIcon from "@mui/icons-material/LocationOnRounded";
 
 import { useCart } from "@/context/CartContext";
 import { moneyMXN } from "@/utils/catalogUtils";
@@ -52,13 +53,22 @@ function pickStoreWhatsAppNumber({ store, sitio, owner }) {
   return onlyDigits(candidates[0] || "");
 }
 
-function buildWhatsAppMessage({ storeName, customerName, customerEmail, items, totals, calcFinalPrice }) {
+function buildWhatsAppMessage({
+  storeName,
+  customerName,
+  customerEmail,
+  customerAddress,
+  items,
+  totals,
+  calcFinalPrice,
+}) {
   const lines = [];
   lines.push(` *Nuevo pedido*`);
   // if (storeName) lines.push(` Tienda: *${storeName}*`);
   lines.push("");
   lines.push(` Cliente: *${customerName || "-"}*`);
   lines.push(` Correo: ${customerEmail || "-"}`);
+  lines.push(` Dirección de envío: ${customerAddress || "-"}`);
   lines.push("");
   lines.push(` *Productos*`);
   lines.push("--------------------------------------------------");
@@ -122,26 +132,32 @@ export default function CartPage() {
   );
 
   const storeName = branding?.titulo || store?.name || "Mi tienda";
-  const waNumber = React.useMemo(() => pickStoreWhatsAppNumber({ store, sitio, owner }), [store, sitio, owner]);
+  const waNumber = React.useMemo(
+    () => pickStoreWhatsAppNumber({ store, sitio, owner }),
+    [store, sitio, owner]
+  );
 
   const [customerName, setCustomerName] = React.useState("");
   const [customerEmail, setCustomerEmail] = React.useState("");
+  const [customerAddress, setCustomerAddress] = React.useState(""); // ✅ NUEVO
   const [touched, setTouched] = React.useState(false);
 
   const nameOk = customerName.trim().length >= 3;
   const emailOk = isEmail(customerEmail);
-  const canSend = items.length > 0 && nameOk && emailOk && !!waNumber;
+  const addressOk = customerAddress.trim().length >= 8; // ✅ NUEVO (ajústalo si quieres)
+  const canSend = items.length > 0 && nameOk && emailOk && addressOk && !!waNumber; // ✅ NUEVO
 
   const message = React.useMemo(() => {
     return buildWhatsAppMessage({
       storeName,
       customerName: customerName.trim(),
       customerEmail: customerEmail.trim(),
+      customerAddress: customerAddress.trim(), // ✅ NUEVO
       items,
       totals,
       calcFinalPrice,
     });
-  }, [storeName, customerName, customerEmail, items, totals, calcFinalPrice]);
+  }, [storeName, customerName, customerEmail, customerAddress, items, totals, calcFinalPrice]);
 
   const handleSendWhatsApp = () => {
     setTouched(true);
@@ -291,7 +307,6 @@ export default function CartPage() {
           </Stack>
         </Paper>
 
-
         <Divider sx={{ my: 2.2, borderColor: BRAND.stroke }} />
 
         {/* Empty */}
@@ -308,15 +323,18 @@ export default function CartPage() {
               animation: `${fadeUp} .35s ease-out`,
             }}
           >
-            <Typography sx={{ fontWeight: 950, mb: 0.5, color: BRAND.text }}>No hay productos aún</Typography>
-            <Typography sx={{ color: BRAND.subtext }}>Agrega productos desde el catálogo.</Typography>
+            <Typography sx={{ fontWeight: 950, mb: 0.5, color: BRAND.text }}>
+              No hay productos aún
+            </Typography>
+            <Typography sx={{ color: BRAND.subtext }}>
+              Agrega productos desde el catálogo.
+            </Typography>
           </Paper>
         ) : (
           <Stack spacing={1.6} sx={{ animation: `${fadeUp} .35s ease-out` }}>
             {/* Items */}
             {items.map((it) => {
               const unit = calcFinalPrice(it);
-              const hasDiscount = Number(it.price || 0) !== unit;
 
               return (
                 <Card
@@ -333,12 +351,7 @@ export default function CartPage() {
                   <CardContent sx={{ p: { xs: 1.35, sm: 2 } }}>
                     <Stack spacing={1.1}>
                       {/* Row 1: Imagen + Info */}
-                      <Stack
-                        direction="row"
-                        spacing={1.2}
-                        alignItems="center"
-                        sx={{ minWidth: 0 }}
-                      >
+                      <Stack direction="row" spacing={1.2} alignItems="center" sx={{ minWidth: 0 }}>
                         <Avatar
                           src={it.image || undefined}
                           variant="rounded"
@@ -390,9 +403,7 @@ export default function CartPage() {
                               {moneyMXN(calcFinalPrice(it))}
                             </Typography>
 
-                            <Typography sx={{ color: BRAND.subtext, fontSize: 12 }}>
-                              c/u
-                            </Typography>
+                            <Typography sx={{ color: BRAND.subtext, fontSize: 12 }}>c/u</Typography>
 
                             {Number(it.price || 0) !== calcFinalPrice(it) && (
                               <Chip
@@ -417,15 +428,12 @@ export default function CartPage() {
                         </Box>
                       </Stack>
 
-                      {/* Row 2: Controles (en móvil abajo para que no se encimen) */}
+                      {/* Row 2: Controles */}
                       <Stack
                         direction="row"
                         alignItems="center"
                         justifyContent="space-between"
-                        sx={{
-                          gap: 1,
-                          flexWrap: "wrap",
-                        }}
+                        sx={{ gap: 1, flexWrap: "wrap" }}
                       >
                         <Stack direction="row" alignItems="center" spacing={0.7}>
                           <IconButton
@@ -441,7 +449,9 @@ export default function CartPage() {
                             <RemoveRoundedIcon />
                           </IconButton>
 
-                          <Typography sx={{ width: 28, textAlign: "center", fontWeight: 950, color: BRAND.text }}>
+                          <Typography
+                            sx={{ width: 28, textAlign: "center", fontWeight: 950, color: BRAND.text }}
+                          >
                             {it.qty}
                           </Typography>
 
@@ -462,9 +472,7 @@ export default function CartPage() {
                         </Stack>
 
                         <Stack direction="row" alignItems="center" spacing={1}>
-                          <Typography sx={{ fontSize: 12, color: BRAND.subtext }}>
-                            Importe
-                          </Typography>
+                          <Typography sx={{ fontSize: 12, color: BRAND.subtext }}>Importe</Typography>
                           <Typography sx={{ fontWeight: 950, color: BRAND.text }}>
                             {moneyMXN(calcFinalPrice(it) * (it.qty || 1))}
                           </Typography>
@@ -485,7 +493,6 @@ export default function CartPage() {
                     </Stack>
                   </CardContent>
                 </Card>
-
               );
             })}
 
@@ -546,6 +553,28 @@ export default function CartPage() {
                     }}
                   />
 
+                  {/* ✅ NUEVO: Dirección */}
+                  <TextField
+                    value={customerAddress}
+                    onChange={(e) => setCustomerAddress(e.target.value)}
+                    onBlur={() => setTouched(true)}
+                    placeholder="Calle, número, colonia, ciudad, C.P., referencias..."
+                    label="Dirección de envío"
+                    fullWidth
+                    multiline
+                    minRows={3}
+                    InputProps={{
+                      startAdornment: <LocationOnRoundedIcon sx={{ mr: 1, mt: 0.5, opacity: 0.7 }} />,
+                    }}
+                    error={touched && !addressOk}
+                    helperText={touched && !addressOk ? "Escribe una dirección más completa (mínimo 8 caracteres)." : " "}
+                    sx={{
+                      "& .MuiOutlinedInput-root": { borderRadius: 3, background: "#fff" },
+                      "& .MuiInputLabel-root": { color: alpha(BRAND.black, 0.65) },
+                      "& .MuiFormHelperText-root": { color: alpha(BRAND.black, 0.60) },
+                    }}
+                  />
+
                   {!waNumber && (
                     <Paper
                       elevation={0}
@@ -582,12 +611,16 @@ export default function CartPage() {
                   alignSelf: { md: "flex-start" },
                 }}
               >
-                <Typography sx={{ fontWeight: 950, mb: 1.2, color: BRAND.text }}>Resumen</Typography>
+                <Typography sx={{ fontWeight: 950, mb: 1.2, color: BRAND.text }}>
+                  Resumen
+                </Typography>
 
                 <Stack spacing={1}>
                   <Stack direction="row" justifyContent="space-between">
                     <Typography sx={{ color: BRAND.subtext }}>Subtotal</Typography>
-                    <Typography sx={{ fontWeight: 950, color: BRAND.text }}>{moneyMXN(totals.subtotal)}</Typography>
+                    <Typography sx={{ fontWeight: 950, color: BRAND.text }}>
+                      {moneyMXN(totals.subtotal)}
+                    </Typography>
                   </Stack>
 
                   <Stack direction="row" justifyContent="space-between">

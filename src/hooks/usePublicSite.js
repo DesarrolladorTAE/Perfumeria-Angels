@@ -1,3 +1,4 @@
+// src/hooks/usePublicSite.js
 import { useEffect, useMemo, useState } from "react";
 import PublicStoreService from "@/api/publicStore.service";
 
@@ -29,7 +30,7 @@ export default function usePublicSite() {
         if (!alive) return;
         setLoading(false);
       }
-    }; 
+    };
 
     run();
 
@@ -51,6 +52,18 @@ export default function usePublicSite() {
     const arr = sitio?.carrusel;
     return Array.isArray(arr) ? arr.filter(Boolean) : [];
   }, [sitio]);
+
+  // ✅ NUEVO: imágenes 6 a 9 (índices 5..8)
+const carrusel0y6a9 = useMemo(() => {
+  if (!Array.isArray(carrusel) || carrusel.length === 0) return [];
+
+  const first = carrusel[0];          // índice 0
+  const rest = carrusel.slice(6, 10); // índices 6,7,8,9
+
+  // Une y elimina vacíos / duplicados
+  return [first, ...rest].filter(Boolean);
+}, [carrusel]);
+
 
   const socials = useMemo(() => {
     if (!sitio) return null;
@@ -90,6 +103,7 @@ export default function usePublicSite() {
 
     // helpers listos
     carrusel,
+    carrusel0y6a9, // ✅ agregado
     socials,
     branding,
   };
