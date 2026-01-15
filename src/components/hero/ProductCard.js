@@ -3,6 +3,8 @@ import { Box, Button, Chip, Rating, Stack, Typography, alpha } from "@mui/materi
 import LocalOfferRoundedIcon from "@mui/icons-material/LocalOfferRounded";
 import NewReleasesRoundedIcon from "@mui/icons-material/NewReleasesRounded";
 import AddShoppingCartRoundedIcon from "@mui/icons-material/AddShoppingCartRounded";
+import VisibilityRoundedIcon from "@mui/icons-material/VisibilityRounded";
+
 
 import { PALETTE, calcDiscount, moneyMXN, pickCover } from "@/utils/catalogUtils";
 import { useCart } from "@/context/CartContext";
@@ -177,23 +179,22 @@ export default function ProductCard({ p, onOpen }) {
                 textDecoration: "line-through",
                 color: "#E53935",
                 fontWeight: 900,
-                fontSize: 11.5,
+                fontSize: 13.5,
               }}
             >
               {moneyMXN(p?.price)}
             </Typography>
           )}
 
-          <Typography sx={{ color: "#111", fontWeight: 950, fontSize: 13.5 }}>
+          <Typography sx={{ color: "#111", fontWeight: 950, fontSize: 20.5 }}>
             {moneyMXN(dc.final)}
           </Typography>
         </Stack>
 
-        {/* ✅ Botón: Agregar al carrito (no abre detalle) */}
         <Button
           fullWidth
           variant="contained"
-          startIcon={<AddShoppingCartRoundedIcon />}
+          // startIcon={<VisibilityRoundedIcon />}
           sx={{
             mt: "auto",
             borderRadius: 1.4,
@@ -206,10 +207,14 @@ export default function ProductCard({ p, onOpen }) {
             boxShadow: "none",
             "&:hover": { bgcolor: "#000" },
           }}
-          onClick={handleAdd}
+          onClick={(e) => {
+            e.stopPropagation(); // 🔒 evita doble evento
+            handleOpen();        // 👁 abre detalles
+          }}
         >
-          Agregar al carrito
+          Mostrar detalles
         </Button>
+
       </Box>
     </Box>
   );

@@ -152,14 +152,24 @@ const HeaderOne = () => {
 
               <div className="main-menu-wrapper__right">
                 <div className="main-menu-wrapper__main-menu">
-                  <a
-                    onClick={() => setIsActive(true)}
-                    className="mobile-nav__toggler"
-                    role="button"
-                    tabIndex={0}
-                  >
-                    <i className="fa fa-bars" />
-                  </a>
+                  <div className="mobile-header-actions">
+                    {/* 1) Carrito primero */}
+                    <Link href="/carrito" className="mobile-cart-btn" aria-label="Ir al carrito">
+                      <i className="fas fa-shopping-cart" />
+                    </Link>
+
+                    {/* 2) Menú después */}
+                    <a
+                      onClick={() => setIsActive(true)}
+                      className="mobile-nav__toggler mobile-menu-btn"
+                      role="button"
+                      tabIndex={0}
+                      aria-label="Abrir menú"
+                    >
+                      <i className="fa fa-bars" />
+                    </a>
+                  </div>
+
 
                   <NavMenu />
                 </div>

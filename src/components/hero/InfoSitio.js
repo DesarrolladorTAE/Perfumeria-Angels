@@ -524,9 +524,9 @@ export default function InfoSitio() {
           </Typography>
 
           <Stack direction={{ xs: "column", sm: "row" }} justifyContent="center" gap={1.5}>
-            <PulseButton component={Link} href="/tienda" endIcon={<ArrowForwardIosRoundedIcon />}>
+            {/* <PulseButton component={Link} href="/tienda" endIcon={<ArrowForwardIosRoundedIcon />}>
               Ir al catálogo
-            </PulseButton>
+            </PulseButton> */}
           </Stack>
         </Box>
 
@@ -639,9 +639,9 @@ export default function InfoSitio() {
           </Box>
 
           <Box sx={{ mt: 2.25, display: "flex", justifyContent: "center" }}>
-            <PulseButton component={Link} href="/tienda" endIcon={<ArrowForwardIosRoundedIcon />}>
+            {/* <PulseButton component={Link} href="/tienda" endIcon={<ArrowForwardIosRoundedIcon />}>
               Entrar al catálogo
-            </PulseButton>
+            </PulseButton> */}
           </Box>
         </Box>
 
@@ -803,9 +803,9 @@ export default function InfoSitio() {
           </Typography>
 
           <Stack direction={{ xs: "column", sm: "row" }} justifyContent="center" gap={1.5}>
-            <PulseButton component={Link} href="/tienda" endIcon={<ArrowForwardIosRoundedIcon />}>
+            {/* <PulseButton component={Link} href="/tienda" endIcon={<ArrowForwardIosRoundedIcon />}>
               Ir al catálogo
-            </PulseButton>
+            </PulseButton> */}
 {/* 
             <Button
               variant="outlined"

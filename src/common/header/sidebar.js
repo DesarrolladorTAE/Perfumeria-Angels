@@ -13,6 +13,7 @@ function buildWhatsappLink(phoneRaw, message) {
   const phone = normalizePhone(phoneRaw);
   if (!phone) return null;
 
+  
   const phoneWithCountry = phone.startsWith("52") ? phone : `52${phone}`;
   const text = encodeURIComponent(message);
   return `https://wa.me/${phoneWithCountry}?text=${text}`;

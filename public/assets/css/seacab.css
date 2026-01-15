@@ -1377,11 +1377,11 @@ ul {
 
 .mobile-nav__content .main-menu__list ul {
     display: none;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    border-top: 1px solid rgba(255, 255, 255, 0.993);
 }
 
 .mobile-nav__content .main-menu__list li:not(:last-child) {
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid rgba(252, 252, 252, 0.441);
 }
 
 .mobile-nav__content .main-menu__list li a {
@@ -5886,7 +5886,7 @@ ul {
 
 .sidebar__tags-list a {
     font-size: 12px;
-    color: #7b848b;
+    color: #f1f5f8;
     -webkit-transition: all 0.4s ease;
     transition: all 0.4s ease;
     background: var(--seacab-white);
@@ -6100,3 +6100,55 @@ ul {
     visibility: visible;
     cursor: pointer;
   }
+
+
+  /* Contenedor iconos móvil */
+.mobile-header-actions {
+  display: none;
+  align-items: center;
+  gap: 28px;
+}
+
+/* Mostrar solo en móvil */
+@media (max-width: 1199px) {
+  .mobile-header-actions {
+    display: inline-flex;
+  }
+}
+
+/* Carrito */
+.mobile-cart-btn,
+.mobile-menu-btn {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  width: auto;
+  height: auto;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+/* Íconos */
+.mobile-cart-btn i,
+.mobile-menu-btn i {
+  font-size: 22px;
+  color: #E64B7A !important; /* rosa de tu marca */
+  transition: 0.2s ease;
+}
+
+/* Hover */
+.mobile-cart-btn:hover i,
+.mobile-menu-btn:hover i {
+  color: #FF6FA3;
+  transform: scale(1.12);
+}
+
+/* Desktop: ocultar */
+@media (min-width: 1200px) {
+  .mobile-header-actions {
+    display: none !important;
+  }
+}

@@ -42,10 +42,12 @@ export default function HeroTwo() {
   const { store, sitio, carrusel } = usePublicSite();
 
   const desktopImg = useMemo(() => {
-    return toAbs(sitio?.img_portada) || "/assets/imags/backgrounds/main-slider-bg.jpg";
+    return (
+      toAbs(sitio?.img_portada) || "/assets/imags/backgrounds/main-slider-bg.jpg"
+    );
   }, [sitio?.img_portada]);
 
-  // ✅ Mobile: carrusel[0] (ej 480x700 o 480x500), si no existe usa portada
+  // ✅ Mobile: carrusel[0], si no existe usa portada
   const mobileImg = useMemo(() => {
     const first = carrusel?.[0];
     return toAbs(first) || desktopImg;
@@ -56,49 +58,56 @@ export default function HeroTwo() {
     sitio?.descripcion ||
     "Perfumes originales, asesoría por WhatsApp y envíos a todo México.";
 
-  // Detectar ratio real del móvil (480x500, 800x670, etc.)
+  // Detectar ratio real del móvil
   const { w: mw, h: mh } = useImageSize(mobileImg);
+
   const mobileRatio = useMemo(() => {
     if (!mw || !mh) return null;
-    return mw / mh; // >1 = horizontal, <1 = vertical
+    return mw / mh;
   }, [mw, mh]);
 
-  // Ajustes finos para móviles según ratio:
-  // - 480x500 => ratio ~0.96 (casi cuadrada)
-  // - 800x670 => ratio ~1.19 (horizontal moderada)
-  // - 480x700 => ratio ~0.68 (vertical)
+  // ✅ aspect-ratio en formato CSS: "1536 / 691"
+  const mobileAspectRatio = useMemo(() => {
+    if (!mw || !mh) return null;
+    return `${mw} / ${mh}`;
+  }, [mw, mh]);
+
+  // ✅ Detecta flyer/banner (muy horizontal) => NO recortar en móvil
+  const isBannerImage = useMemo(() => {
+    if (!mobileRatio) return false;
+    return mobileRatio > 1.25; // flyers/promos tipo anuncio
+  }, [mobileRatio]);
+
+  // Ajustes para móviles según ratio (cuando NO es banner)
   const mobileFit = useMemo(() => {
-    // defaults
+    let objectFit = "cover";
     let objectPosition = "center 20%";
     let minHeight = 430;
 
-    if (mobileRatio == null) {
-      return { objectPosition, minHeight };
+    if (!mobileRatio) {
+      return { objectFit, objectPosition, minHeight };
     }
 
-    // Vertical (ej 480x700): mejor top para no cortar “parte importante”
     if (mobileRatio < 0.85) {
       objectPosition = "center top";
       minHeight = 460;
-    }
-    // Casi cuadrada (480x500): centrado para no cortar demasiado arriba/abajo
-    else if (mobileRatio >= 0.85 && mobileRatio <= 1.05) {
+    } else if (mobileRatio <= 1.05) {
       objectPosition = "center center";
       minHeight = 420;
-    }
-    // Horizontal moderada (800x670): centrar un poco arriba para conservar composición
-    else if (mobileRatio > 1.05 && mobileRatio <= 1.35) {
+    } else if (mobileRatio <= 1.35) {
       objectPosition = "center 30%";
       minHeight = 380;
-    }
-    // Muy horizontal: centrar
-    else {
+    } else {
       objectPosition = "center center";
       minHeight = 360;
     }
 
-    return { objectPosition, minHeight };
+    return { objectFit, objectPosition, minHeight };
   }, [mobileRatio]);
+
+  const heroClass = useMemo(() => {
+    return `pa-hero ${isBannerImage ? "pa-hero--banner" : ""}`;
+  }, [isBannerImage]);
 
   return (
     <>
@@ -106,7 +115,7 @@ export default function HeroTwo() {
         .pa-hero {
           position: relative;
           width: 100%;
-          min-height: 520px;
+          min-height: 520px; /* desktop base */
           overflow: hidden;
           display: flex;
           align-items: center;
@@ -167,38 +176,53 @@ export default function HeroTwo() {
           opacity: 0.95;
         }
 
-        /* ✅ MOBILE */
+        /* ✅ MOBILE GENERAL (NO banner) */
         @media (max-width: 991px) {
-          .pa-hero {
-            min-height: ${mobileFit.minHeight}px; /* 👈 ajusta según ratio */
+          .pa-hero:not(.pa-hero--banner) {
+            min-height: ${mobileFit.minHeight}px;
           }
 
-          .pa-hero__media {
-            object-fit: cover; /* llena hero */
-            object-position: ${mobileFit.objectPosition}; /* 👈 recorte inteligente */
+          .pa-hero:not(.pa-hero--banner) .pa-hero__media {
+            object-fit: ${mobileFit.objectFit};
+            object-position: ${mobileFit.objectPosition};
+            background: #fff;
           }
 
           .pa-hero__content {
-            padding: 52px 0;
-          }
-
-          .pa-hero__title {
-            font-size: 34px;
-          }
-
-          .pa-hero__desc {
-            font-size: 16px;
+            padding: 40px 0;
           }
         }
 
-        @media (max-width: 480px) {
-          .pa-hero {
-            min-height: ${Math.max(340, mobileFit.minHeight - 40)}px;
+        /* ✅ MOBILE BANNER (SIN ESPACIOS BLANCOS) */
+        @media (max-width: 991px) {
+          .pa-hero--banner {
+            /* 🔥 IMPORTANTÍSIMO: matar el min-height que te deja el hueco */
+            min-height: 0 !important;
+            height: auto;
+
+            /* Ajustar al tamaño real del banner */
+            ${mobileAspectRatio ? `aspect-ratio: ${mobileAspectRatio};` : ""}
+
+            /* ya no queremos centrar con flex porque eso “se siente” como espacio */
+            display: block;
+          }
+
+          .pa-hero--banner .pa-hero__media {
+            object-fit: contain; /* banner completo */
+            object-position: center center;
+            background: transparent; /* si quieres blanco, pon #fff */
+          }
+
+          /* si no estás mostrando textos, esto QUITA el padding que infla el alto */
+          .pa-hero--banner .pa-hero__content {
+            padding: 0 !important;
+            height: 0;       /* no aporta altura */
+            overflow: hidden;
           }
         }
       `}</style>
 
-      <section className="pa-hero">
+      <section className={heroClass}>
         <picture>
           <source media="(max-width: 991px)" srcSet={mobileImg} />
           <img
@@ -212,11 +236,12 @@ export default function HeroTwo() {
         <div className="container">
           <div className="pa-hero__content">
             <div className="pa-hero__inner">
+              {/* Si luego quieres mostrar texto y botón, descomenta: */}
               {/* <h1 className="pa-hero__title">{title}</h1>
-              <p className="pa-hero__desc">{description}</p> */}
+              <p className="pa-hero__desc">{description}</p>
               <Link href="/tienda" className="pa-hero__btn">
                 Compra ya
-              </Link>
+              </Link> */}
             </div>
           </div>
         </div>
