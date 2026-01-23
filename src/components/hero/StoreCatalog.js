@@ -473,7 +473,7 @@ export default function StoreCatalog({ routeSku = null }) {
   const openProduct = React.useCallback(
     (p) => {
       if (!p?.sku) return;
-      router.push(`/tienda?sku=${encodeURIComponent(p.sku)}`, undefined, { shallow: true });
+      router.push(`/tienda/${encodeURIComponent(p.sku)}`, undefined, { shallow: true });
     },
     [router]
   );

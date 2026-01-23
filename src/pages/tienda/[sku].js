@@ -1,45 +1,94 @@
 // pages/tienda/[sku].jsx
 import Head from "next/head";
+import StoreCatalog from "@/components/store/StoreCatalog"; // ajusta path real
+import PublicStoreService from "@/api/publicStore.service";
+
+function absUrl(req, path) {
+  // si estás en Vercel/Proxy, puede venir x-forwarded-proto/host
+  const proto = req?.headers["x-forwarded-proto"] || "https";
+  const host = req?.headers["x-forwarded-host"] || req?.headers.host;
+  return `${proto}://${host}${path}`;
+}
 
 export async function getServerSideProps(ctx) {
   const { sku } = ctx.params;
 
-  // Cambia esto a tu API real:
-  const res = await fetch(`${process.env.API_URL}/products/${encodeURIComponent(sku)}`);
-  if (!res.ok) return { notFound: true };
+  try {
+    // 1) Traer productos para mapear SKU -> ID
+    const pRes = await PublicStoreService.getProducts();
+    const products = pRes?.data?.products ?? [];
 
-  const product = await res.json();
+    const match = (products || []).find(
+      (p) => String(p?.sku || "").toLowerCase() === String(sku).toLowerCase()
+    );
 
-  return { props: { product } };
+    if (!match?.id) return { notFound: true };
+
+    // 2) Traer detalle por ID
+    const dRes = await PublicStoreService.getProductDetail(match.id);
+    const product = dRes?.data?.product ?? null;
+
+    if (!product) return { notFound: true };
+
+    // 3) URL absoluta para og:url
+    const url = absUrl(ctx.req, `/tienda/${encodeURIComponent(product.sku)}`);
+
+    // 4) Imagen OG (primera imagen o fallback)
+    const image =
+      (Array.isArray(product.images) && product.images[0]) ||
+      (Array.isArray(product.image) && product.image[0]) ||
+      product?.image ||
+      absUrl(ctx.req, "/og-default.jpg"); // pon una default en /public
+
+    return {
+      props: {
+        routeSku: product.sku,
+        og: {
+          title: product.name || "Producto",
+          description: product.shortDescription || "Mira este producto",
+          url,
+          image,
+        },
+      },
+    };
+  } catch (e) {
+    // si tu API falla, no rompas el sitio: manda OG genérico
+    const url = absUrl(ctx.req, `/tienda/${encodeURIComponent(sku)}`);
+    return {
+      props: {
+        routeSku: sku,
+        og: {
+          title: "Producto",
+          description: "Mira este producto",
+          url,
+          image: absUrl(ctx.req, "/og-default.jpg"),
+        },
+      },
+    };
+  }
 }
 
-export default function ProductSharePage({ product }) {
-  const url = `https://tudominio.com/tienda/${encodeURIComponent(product.sku)}`;
-  const img = product.images?.[0] || "https://tudominio.com/og-default.jpg";
-
+export default function ProductSkuPage({ routeSku, og }) {
   return (
     <>
       <Head>
-        <title>{product.name}</title>
-        <meta name="description" content={product.shortDescription || ""} />
+        <title>{og?.title}</title>
+        <meta name="description" content={og?.description} />
 
-        <meta property="og:title" content={product.name} />
-        <meta property="og:description" content={product.shortDescription || ""} />
-        <meta property="og:image" content={img} />
-        <meta property="og:url" content={url} />
+        <meta property="og:title" content={og?.title} />
+        <meta property="og:description" content={og?.description} />
+        <meta property="og:url" content={og?.url} />
         <meta property="og:type" content="product" />
+        <meta property="og:image" content={og?.image} />
 
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={product.name} />
-        <meta name="twitter:description" content={product.shortDescription || ""} />
-        <meta name="twitter:image" content={img} />
+        <meta name="twitter:title" content={og?.title} />
+        <meta name="twitter:description" content={og?.description} />
+        <meta name="twitter:image" content={og?.image} />
       </Head>
 
-      {/* Puedes redirigir a tu tienda real si quieres */}
-      <main style={{ padding: 24 }}>
-        <h1>{product.name}</h1>
-        <p>{product.shortDescription}</p>
-      </main>
+      {/* Reusa tu catálogo y abre el dialog por SKU */}
+      <StoreCatalog routeSku={routeSku} />
     </>
   );
 }

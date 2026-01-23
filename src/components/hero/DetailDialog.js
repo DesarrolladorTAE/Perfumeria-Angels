@@ -67,7 +67,8 @@ export default function DetailDialog({
     if (typeof window === "undefined") return null;
 
     // ✅ ojo: sin slash extra antes del ?
-    return `${window.location.origin}/tienda?sku=${encodeURIComponent(sku)}`;
+    return `${window.location.origin}/tienda/${encodeURIComponent(sku)}`;
+
   }, [detail?.sku]);
 
   const handleShare = React.useCallback(async () => {
