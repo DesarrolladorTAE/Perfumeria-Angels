@@ -36,13 +36,13 @@ function MyApp({ Component, pageProps }) {
         <meta property="og:title" content="Perfumería Angels" />
         <meta property="og:description" content="Compra perfumes y fragancias en línea." />
         <meta property="og:type" content="website" />
-        <meta property="og:image" content="https://tudominio.com/og-default.jpg" />
-        <meta property="og:url" content="https://tudominio.com/tienda" />
+        <meta property="og:image" content="https://mitiendaenlineamx.com.mx/storage/sitios/244/logo/y10uBNdCLuzUGpvJ5uKACxUutelAgUTo9X8pkQxU.png" />
+        <meta property="og:url" content="https://perfumeria-angels.com/" />
 
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="Perfumería Angels" />
         <meta name="twitter:description" content="Compra perfumes y fragancias en línea." />
-        <meta name="twitter:image" content="https://tudominio.com/og-default.jpg" />
+        <meta name="twitter:image" content="https://mitiendaenlineamx.com.mx/storage/sitios/244/logo/y10uBNdCLuzUGpvJ5uKACxUutelAgUTo9X8pkQxU.png" />
       </Head>
 
       <CartProvider>

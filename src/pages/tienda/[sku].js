@@ -1,6 +1,6 @@
 // pages/tienda/[sku].jsx
 import Head from "next/head";
-import StoreCatalog from "@/components/store/StoreCatalog"; // ajusta path real
+import StoreCatalog from "@/components/hero/StoreCatalog"; // ajusta path real
 import PublicStoreService from "@/api/publicStore.service";
 
 function absUrl(req, path) {
