@@ -18,29 +18,47 @@
 # Common
 --------------------------------------------------------------*/
 @import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300;1,400;1,500;1,600;1,700;1,800&family=Red+Hat+Text:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap');
+
 :root {
   --seacab-font: 'Open Sans', sans-serif;
   --seacab-font-two: 'Red Hat Text', sans-serif;
 
-  /* Palette: Angel’s PERFUMES */
-  --seacab-base: #E94B7C;          /* Accent Fucsia */
-  --seacab-base-rgb: 233, 75, 124;
+  /* 🔵 Azul corporativo principal */
+  --seacab-base: #0D3B66;          /* Azul profundo tech */
+  --seacab-base-rgb: 13, 59, 102;
 
-  --seacab-soft-pink: #F8D8E0;     /* Soft Pink */
-  --seacab-soft-pink-rgb: 248, 216, 224;
+  /* 🔵 Azul secundario (hover / botones) */
+  --seacab-blue-light: #145DA0;
+  --seacab-blue-light-rgb: 20, 93, 160;
 
-  --seacab-gray: #5A5A5A;          /* Warm Grey */
-  --seacab-gray-rgb: 90, 90, 90;
+  /* 🔵 Azul brillante (call to action) */
+  --seacab-accent: #1E88E5;
+  --seacab-accent-rgb: 30, 136, 229;
 
-  --seacab-white: #FFFFFF;         /* Clean White */
+  /* 🔴 Rojo del logo (usar solo como detalle) */
+  --seacab-logo-red: #E10600;
+  --seacab-logo-red-rgb: 225, 6, 0;
+
+  /* ⚫ Gris oscuro técnico */
+  --seacab-dark: #1C1F26;
+  --seacab-dark-rgb: 28, 31, 38;
+
+  /* 🩶 Gris medio */
+  --seacab-gray: #6C757D;
+  --seacab-gray-rgb: 108, 117, 125;
+
+  /* ⚪ Blanco limpio */
+  --seacab-white: #FFFFFF;
   --seacab-white-rgb: 255, 255, 255;
 
-  /* Neutro oscuro (no viene en la paleta, pero lo necesitas para texto) */
-  --seacab-black: #222222;
-  --seacab-black-rgb: 34, 34, 34;
+  /* 🟢 WhatsApp */
+  --seacab-whatsapp: #25D366;
+  --seacab-whatsapp-rgb: 37, 211, 102;
 
-  --seacab-bdr-radius: 5px;
+  --seacab-bdr-radius: 6px;
 }
+
+
 
 
 .row {
@@ -317,19 +335,19 @@ ul {
 
 /* scroll to top */
 .scroll-to-top {
-    width: 45px!important;
-    height: 45px!important;
-    background: var(--seacab-base)!important;
-    position: fixed!important;
-    bottom: 40px!important;
-    right: 40px!important;
-    z-index: 99!important;
-    text-align: center!important;
-    -webkit-transition: all 0.4s ease!important;
-    transition: all 0.4s ease!important;
-    border-radius: 50%!important;
-    transition: all 0.4s ease!important;
-    border: none!important;
+    width: 45px !important;
+    height: 45px !important;
+    background: var(--seacab-base) !important;
+    position: fixed !important;
+    bottom: 40px !important;
+    right: 40px !important;
+    z-index: 99 !important;
+    text-align: center !important;
+    -webkit-transition: all 0.4s ease !important;
+    transition: all 0.4s ease !important;
+    border-radius: 50% !important;
+    transition: all 0.4s ease !important;
+    border: none !important;
 }
 
 .scroll-to-top svg {
@@ -393,7 +411,7 @@ ul {
     top: -8px;
     bottom: -7px;
     left: 0px;
-    right: 460px;
+    right: 380px;
     content: "";
     background-color: var(--seacab-base);
     z-index: -1;
@@ -710,6 +728,7 @@ ul {
     transition: transform 500ms ease, visibility 500ms ease;
     box-shadow: 0px 10px 60px 0px rgba(0, 0, 0, 0.05);
 }
+
 @media (max-width: 1199px) {
     .stricky-header {
         display: none !important;
@@ -774,14 +793,14 @@ ul {
 
 /* Oculta el botón "Realiza una cotización" en móvil/tablet */
 @media (max-width: 1199px) {
-  .main-header__btn {
-    display: none !important;
-  }
+    .main-header__btn {
+        display: none !important;
+    }
 
-  /* Si quieres también quitar el margen derecho del menú que deja hueco */
-  .main-menu-wrapper__main-menu {
-    margin-right: 0 !important;
-  }
+    /* Si quieres también quitar el margen derecho del menú que deja hueco */
+    .main-menu-wrapper__main-menu {
+        margin-right: 0 !important;
+    }
 }
 
 /*--------------------------------------------------------------
@@ -5923,35 +5942,34 @@ ul {
 
 .mean-container a.meanmenu-reveal {
     display: none;
-  }
-  
-  .mean-container .mean-nav {
+}
+
+.mean-container .mean-nav {
     background: none;
     margin-top: 0;
-  }
-  
-  .mean-container .mean-bar {
+}
+
+.mean-container .mean-bar {
     padding: 0;
     min-height: auto;
     background: none;
-  }
-  
-  .mean-container .mean-nav > ul {
+}
+
+.mean-container .mean-nav>ul {
     padding: 0;
     margin: 0;
     width: 100%;
     list-style-type: none;
     display: block !important;
-  }
-  
-  .mean-container a.meanmenu-reveal {
+}
+
+.mean-container a.meanmenu-reveal {
     display: none !important;
-  }
-  
-  .mean-container .mean-nav ul li a {
-    
-  }
-  .mean-container .mean-nav ul li a:hover {
+}
+
+.mean-container .mean-nav ul li a {}
+
+.mean-container .mean-nav ul li a:hover {
     color: #fff;
 }
 
@@ -5959,6 +5977,7 @@ ul {
     position: relative;
     padding: 10px 0;
 }
+
 .mean-container .mean-nav ul li a.mean-expand {
     float: right;
     color: #fff;
@@ -5972,27 +5991,26 @@ ul {
     top: 0;
     top: 12px;
 }
-  .mean-container .mean-nav ul li a.mean-expand:hover {
-    
-  }
-  
-  .mean-container .mean-nav ul li > a > i {
+
+.mean-container .mean-nav ul li a.mean-expand:hover {}
+
+.mean-container .mean-nav ul li>a>i {
     display: none;
-  }
-  
-  .mean-container .mean-nav ul li > a.mean-expand i {
+}
+
+.mean-container .mean-nav ul li>a.mean-expand i {
     display: inline-block;
-  }
-  
-  .mean-container .mean-nav > ul > li:first-child > a {
+}
+
+.mean-container .mean-nav>ul>li:first-child>a {
     border-top: 0;
-  }
-  
-  .mean-container .mean-nav ul li a.mean-expand.mean-clicked {
+}
+
+.mean-container .mean-nav ul li a.mean-expand.mean-clicked {
     color: #222;
     background-color: #fff;
 }
-  
+
 .mean-container .mean-nav ul li a.mean-expand.mean-clicked i {
     transform: rotate(45deg);
     -webkit-transform: rotate(45deg);
@@ -6002,7 +6020,7 @@ ul {
     color: var(--seacab-black);
 }
 
-  .tt-offcanvas {
+.tt-offcanvas {
     position: fixed;
     background-color: var(--seacab-black);
     top: 0;
@@ -6017,11 +6035,13 @@ ul {
     transition: all 0.3s ease-out 0s;
     -ms-overflow-style: none;
     scrollbar-width: none;
-  }
-  .tt-offcanvas:-webkit-scrollbar {
+}
+
+.tt-offcanvas:-webkit-scrollbar {
     display: none;
-  }
-  .tt-offcanvas-close {
+}
+
+.tt-offcanvas-close {
     position: absolute;
     top: 45px;
     right: 13px;
@@ -6035,13 +6055,16 @@ ul {
     transition: all 0.5s ease-out 0s;
     z-index: 999;
 }
-  .tt-offcanvas-close i {
+
+.tt-offcanvas-close i {
     line-height: 50px;
-  }
-  .tt-offcanvas-close:hover {
+}
+
+.tt-offcanvas-close:hover {
     box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.1);
-  }
-  .tt-offcanvas__social a {
+}
+
+.tt-offcanvas__social a {
     font-size: 16px;
     display: inline-block;
     width: 50px;
@@ -6052,38 +6075,41 @@ ul {
     line-height: 49px;
     margin-right: 5px;
     border-radius: 8px;
-  }
-  .tt-offcanvas__social a:hover {
+}
+
+.tt-offcanvas__social a:hover {
     background-color: #ff3c58;
     color: #fff;
-  }
-  .tt-offcanvas.opened {
+}
+
+.tt-offcanvas.opened {
     right: 0;
     opacity: 1;
     visibility: visible;
-  }
-  @media (max-width:576px) {
+}
+
+@media (max-width:576px) {
     .tt-offcanvas {
-      width: 300px;
-      padding: 50px 20px;
+        width: 300px;
+        padding: 50px 20px;
     }
-  }
-  
-  .offc-top-pattern {
+}
+
+.offc-top-pattern {
     position: absolute;
     top: 0;
     right: 0;
     z-index: -1;
-  }
-  
-  .offc-bottom-pattern {
+}
+
+.offc-bottom-pattern {
     position: absolute;
     left: 0;
     bottom: 0;
     z-index: -1;
-  }
+}
 
-  .body-overlay {
+.body-overlay {
     background-color: rgba(0, 0, 0, 0.5);
     height: 100%;
     width: 100%;
@@ -6094,61 +6120,63 @@ ul {
     opacity: 0;
     visibility: hidden;
     transition: all 0.3s ease-out 0s;
-  }
-  .body-overlay.opened {
+}
+
+.body-overlay.opened {
     opacity: 1;
     visibility: visible;
     cursor: pointer;
-  }
+}
 
 
-  /* Contenedor iconos móvil */
+/* Contenedor iconos móvil */
 .mobile-header-actions {
-  display: none;
-  align-items: center;
-  gap: 28px;
+    display: none;
+    align-items: center;
+    gap: 28px;
 }
 
 /* Mostrar solo en móvil */
 @media (max-width: 1199px) {
-  .mobile-header-actions {
-    display: inline-flex;
-  }
+    .mobile-header-actions {
+        display: inline-flex;
+    }
 }
 
 /* Carrito */
 .mobile-cart-btn,
 .mobile-menu-btn {
-  background: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-  width: auto;
-  height: auto;
-  padding: 0;
-  display: grid;
-  place-items: center;
-  text-decoration: none;
-  cursor: pointer;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    width: auto;
+    height: auto;
+    padding: 0;
+    display: grid;
+    place-items: center;
+    text-decoration: none;
+    cursor: pointer;
 }
 
 /* Íconos */
 .mobile-cart-btn i,
 .mobile-menu-btn i {
-  font-size: 22px;
-  color: #E64B7A !important; /* rosa de tu marca */
-  transition: 0.2s ease;
+    font-size: 22px;
+    color: #E64B7A !important;
+    /* rosa de tu marca */
+    transition: 0.2s ease;
 }
 
 /* Hover */
 .mobile-cart-btn:hover i,
 .mobile-menu-btn:hover i {
-  color: #FF6FA3;
-  transform: scale(1.12);
+    color: #FF6FA3;
+    transform: scale(1.12);
 }
 
 /* Desktop: ocultar */
 @media (min-width: 1200px) {
-  .mobile-header-actions {
-    display: none !important;
-  }
+    .mobile-header-actions {
+        display: none !important;
+    }
 }

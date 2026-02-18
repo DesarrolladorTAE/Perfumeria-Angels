@@ -11,7 +11,7 @@ function toAbs(url) {
 const FooterOne = () => {
   const { store, sitio, socials } = usePublicSite();
 
-  const storeName = store?.name || "Perfumería Ángeles";
+  const storeName = store?.name || "Intercomp";
 
   const logo = useMemo(() => {
     return toAbs(sitio?.logo) || "/assets/images/resources/footer-logo.png";
@@ -19,7 +19,7 @@ const FooterOne = () => {
 
   const description =
     sitio?.descripcion ||
-    "Perfumes originales con envíos a todo México y atención personalizada por WhatsApp.";
+    "La satisfacción de nuestros clientes y su posterior recomendación han hecho que cada día se incremente nuestro mercado activo.";
 
   // ✅ Redes en orden y solo si existen (igual que HeaderOne)
   const socialLinks = useMemo(() => {
@@ -122,11 +122,12 @@ const FooterOne = () => {
                   <h3 className="footer-widget__title">Operamos en:</h3>
                   <div className="footer-widget__map-box">
                     <iframe
-                      src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d61688.26478970453!2d-92.27796175!3d14.9082877!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x858e0f395e71c1b1%3A0x5d28b9b800b8228b!2sTapachula%2C%20Chis.!5e0!3m2!1ses-419!2smx!4v1767737947656!5m2!1ses-419!2smx"
+                      src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d61089.7222444563!2d-99.906993!3d16.870569!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x85ca57e549c288d5%3A0xef7b3298099b97cb!2sINTERCOMP!5e0!3m2!1ses-419!2sus!4v1771452112219!5m2!1ses-419!2sus"
                       className="footer-widget-map__one"
                       allowFullScreen
                       loading="lazy"
                     ></iframe>
+                    
                   </div>
                 </div>
               </div>
@@ -136,7 +137,7 @@ const FooterOne = () => {
           {/* ===== COPYRIGHT ===== */}
           <div className="site-footer__bottom">
             <p className="site-footer__bottom-text">
-              © 2026 Copyright by <strong>Perfumería Ángel´s</strong> / MiTiendaEnLineaMX
+              © 2026 Copyright by <strong>INTERCOMP</strong> / MiTiendaEnLineaMX
             </p>
           </div>
         </div>

@@ -1,7 +1,7 @@
 import axiosClient from "./axiosClient";
 
-const STORE_ID = 244;
-const STORE_SLUG = "perfumeria-angels";
+const STORE_ID = 19;
+const STORE_SLUG = "intercomp";
 
 const PublicStoreService = {
   // GET /public/stores/244/categories

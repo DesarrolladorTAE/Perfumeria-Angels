@@ -8,7 +8,7 @@ const menu_data = [
   {
     id: 2,
     has_dropdown: false,
-    title: "Perfumes",
+    title: "Tienda",
     link: "/tienda", // tu "tienda" vive aquí
   },
   {

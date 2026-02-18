@@ -33,16 +33,16 @@ function MyApp({ Component, pageProps }) {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
 
         {/* OG/Twitter genéricos (cámbialos a tu dominio/imagen reales) */}
-        <meta property="og:title" content="Perfumería Angels" />
-        <meta property="og:description" content="Compra perfumes y fragancias en línea." />
+        <meta property="og:title" content="Intercomp" />
+        <meta property="og:description" content="Servicio Profesional En Equipos de Computo." />
         <meta property="og:type" content="website" />
-        <meta property="og:image" content="https://mitiendaenlineamx.com.mx/storage/sitios/244/logo/y10uBNdCLuzUGpvJ5uKACxUutelAgUTo9X8pkQxU.png" />
-        <meta property="og:url" content="https://perfumeria-angels.com/" />
+        <meta property="og:image" content="https://mitiendaenlineamx.com.mx/storage/sitios/19/logo/gI5QwltdHwof4eyjtVpDwMW0N5krQluzYSaMr73e.png" />
+        <meta property="og:url" content="https://grupointercomp.com/" />
 
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="Perfumería Angels" />
-        <meta name="twitter:description" content="Compra perfumes y fragancias en línea." />
-        <meta name="twitter:image" content="https://mitiendaenlineamx.com.mx/storage/sitios/244/logo/y10uBNdCLuzUGpvJ5uKACxUutelAgUTo9X8pkQxU.png" />
+        <meta name="twitter:title" content="Intercomp" />
+        <meta name="twitter:description" content="Servicio Profesional En Equipos de Computo" />
+        <meta name="twitter:image" content="https://mitiendaenlineamx.com.mx/storage/sitios/19/logo/gI5QwltdHwof4eyjtVpDwMW0N5krQluzYSaMr73e.png" />
       </Head>
 
       <CartProvider>

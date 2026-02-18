@@ -16,29 +16,32 @@ import {
   ListItemIcon,
   ListItemText,
   alpha,
+  Grid,
 } from "@mui/material";
 
 import WhatsAppIcon from "@mui/icons-material/WhatsApp";
-import ArrowForwardIosRoundedIcon from "@mui/icons-material/ArrowForwardIosRounded";
 import CategoryOutlinedIcon from "@mui/icons-material/CategoryOutlined";
 import LocalShippingOutlinedIcon from "@mui/icons-material/LocalShippingOutlined";
-import PaymentsOutlinedIcon from "@mui/icons-material/PaymentsOutlined";
 import VerifiedOutlinedIcon from "@mui/icons-material/VerifiedOutlined";
 import SupportAgentOutlinedIcon from "@mui/icons-material/SupportAgentOutlined";
 import Inventory2OutlinedIcon from "@mui/icons-material/Inventory2Outlined";
 import LocalOfferOutlinedIcon from "@mui/icons-material/LocalOfferOutlined";
-import AccountBalanceOutlinedIcon from "@mui/icons-material/AccountBalanceOutlined";
-import CreditCardOutlinedIcon from "@mui/icons-material/CreditCardOutlined";
 import LocationOnOutlinedIcon from "@mui/icons-material/LocationOnOutlined";
 import RequestQuoteOutlinedIcon from "@mui/icons-material/RequestQuoteOutlined";
-import BlockOutlinedIcon from "@mui/icons-material/BlockOutlined";
 
-/** Paleta (la tuya) */
+import ComputerOutlinedIcon from "@mui/icons-material/ComputerOutlined";
+import LanOutlinedIcon from "@mui/icons-material/LanOutlined";
+import SupportOutlinedIcon from "@mui/icons-material/SupportOutlined";
+
+/** ✅ Paleta Intercomp (azules) */
 const BRAND = {
-  accent: "#E94B7C", // fucsia
-  soft: "#F8D8E0", // soft pink
-  grey: "#5A5A5A", // warm grey
-  white: "#FFFFFF", // white
+  primary: "#0D47A1",
+  accent: "#1976D2",
+  accentSoft: "#42A5F5",
+  dark: "#0B1E34",
+  light: "#F4F8FD",
+  white: "#FFFFFF",
+  grey: "#5F6B7A",
 };
 
 /** Convierte a URL absoluta si viene relativa */
@@ -69,7 +72,7 @@ function PulseButton({ sx, ...props }) {
         py: { xs: 1.2, md: 1.35 },
         bgcolor: BRAND.accent,
         color: BRAND.white,
-        boxShadow: `0 16px 36px ${alpha(BRAND.accent, 0.33)}, 0 8px 18px rgba(0,0,0,0.12)`,
+        boxShadow: `0 16px 36px ${alpha(BRAND.accent, 0.28)}, 0 8px 18px rgba(0,0,0,0.12)`,
         position: "relative",
         overflow: "hidden",
         transition: "transform 180ms ease, filter 180ms ease",
@@ -80,7 +83,7 @@ function PulseButton({ sx, ...props }) {
         animation: "pulseSoft 2.2s ease-in-out infinite",
         "&:hover": {
           animation: "none",
-          bgcolor: BRAND.accent,
+          bgcolor: BRAND.primary,
           transform: "translateY(-2px) scale(1.03)",
           filter: "saturate(1.05)",
         },
@@ -93,7 +96,7 @@ function PulseButton({ sx, ...props }) {
           height: "190%",
           transform: "rotate(20deg)",
           background:
-            "linear-gradient(to right, rgba(255,255,255,0), rgba(255,255,255,0.35), rgba(255,255,255,0))",
+            "linear-gradient(to right, rgba(255,255,255,0), rgba(255,255,255,0.30), rgba(255,255,255,0))",
           opacity: 0,
         },
         "&:hover:after": {
@@ -110,7 +113,7 @@ function PulseButton({ sx, ...props }) {
   );
 }
 
-/** ✅ Imagen: ocupa 100% del contenedor (sin maxWidth) */
+/** ✅ Imagen: ocupa 100% del contenedor */
 function LandingMedia({ src, alt, position = "center 40%" }) {
   if (!src) return null;
 
@@ -122,7 +125,7 @@ function LandingMedia({ src, alt, position = "center 40%" }) {
         borderRadius: { xs: 3, md: 3.5 },
         overflow: "hidden",
         border: `1px solid ${alpha(BRAND.accent, 0.18)}`,
-        background: alpha(BRAND.soft, 0.55),
+        background: alpha(BRAND.light, 0.65),
         boxShadow: "0 22px 65px rgba(0,0,0,0.14)",
       }}
     >
@@ -154,7 +157,7 @@ function BenefitBox({ icon, title, desc }) {
         mt: 2,
         borderRadius: 3,
         border: `1px solid ${alpha(BRAND.accent, 0.14)}`,
-        background: alpha(BRAND.white, 0.88),
+        background: alpha(BRAND.white, 0.92),
         boxShadow: "0 18px 55px rgba(0,0,0,0.06)",
         p: { xs: 2, md: 2.25 },
         display: "flex",
@@ -183,7 +186,7 @@ function BenefitBox({ icon, title, desc }) {
         <Typography
           sx={{
             fontWeight: 950,
-            color: "#222",
+            color: BRAND.dark,
             fontSize: { xs: 15.5, md: 16.5 },
             lineHeight: 1.25,
           }}
@@ -193,7 +196,7 @@ function BenefitBox({ icon, title, desc }) {
         <Typography
           sx={{
             mt: 0.5,
-            color: alpha(BRAND.grey, 0.95),
+            color: alpha(BRAND.grey, 0.98),
             fontSize: { xs: 13.75, md: 14.5 },
             lineHeight: 1.6,
           }}
@@ -220,14 +223,14 @@ function FeatureList({ items = [] }) {
           px: { xs: 1, md: 1.25 },
           py: { xs: 0.95, md: 1.05 },
           border: `1px solid ${alpha(BRAND.accent, 0.12)}`,
-          background: alpha(BRAND.white, 0.86),
+          background: alpha(BRAND.white, 0.90),
           boxShadow: "0 12px 34px rgba(0,0,0,0.05)",
           transition: "transform 180ms ease, box-shadow 180ms ease, background 180ms ease",
           alignItems: "flex-start",
           "&:hover": {
             transform: { md: "translateY(-2px)" },
             boxShadow: "0 18px 46px rgba(0,0,0,0.09)",
-            background: alpha(BRAND.soft, 0.55),
+            background: alpha(BRAND.light, 0.65),
           },
         },
         "& .MuiListItemIcon-root": {
@@ -237,12 +240,12 @@ function FeatureList({ items = [] }) {
         },
         "& .MuiListItemText-primary": {
           fontWeight: 950,
-          color: "#222",
+          color: BRAND.dark,
           fontSize: { xs: 15.5, md: 16.5 },
           lineHeight: 1.25,
         },
         "& .MuiListItemText-secondary": {
-          color: alpha(BRAND.grey, 0.95),
+          color: alpha(BRAND.grey, 0.98),
           fontSize: { xs: 13.75, md: 14.5 },
           lineHeight: 1.55,
           mt: 0.25,
@@ -259,12 +262,7 @@ function FeatureList({ items = [] }) {
   );
 }
 
-/**
- * ✅ LandingSection FIX DEFINITIVO:
- * - md+: 2 columnas 50/50 con CSS Grid (siempre lado a lado)
- * - xs: columna con INFO primero y luego IMAGEN
- * - flip: intercambia columnas en escritorio (no afecta móvil)
- */
+/** Sección 2 columnas */
 function LandingSection({
   flip = false,
   kicker,
@@ -338,12 +336,11 @@ function LandingSection({
         sx={{
           display: { xs: "flex", md: "grid" },
           flexDirection: { xs: "column", md: "unset" },
-          gridTemplateColumns: { md: hasMedia ? "1fr 1fr" : "1fr" }, // ✅ 50/50 real
+          gridTemplateColumns: { md: hasMedia ? "1fr 1fr" : "1fr" },
           gap: { xs: 2.25, md: 4 },
           alignItems: "center",
         }}
       >
-        {/* INFO (siempre primero en móvil) */}
         <Box
           sx={{
             order: { xs: 1, md: flip ? 2 : 1 },
@@ -372,7 +369,7 @@ function LandingSection({
               sx={{
                 fontWeight: 950,
                 letterSpacing: -0.6,
-                color: "#111",
+                color: BRAND.dark,
                 lineHeight: 1.08,
                 fontSize: { xs: 28, sm: 34, md: 44 },
                 textAlign: { xs: "center", md: "left" },
@@ -384,11 +381,11 @@ function LandingSection({
             {subtitle ? (
               <Typography
                 sx={{
-                  color: alpha(BRAND.grey, 0.95),
+                  color: alpha(BRAND.grey, 0.98),
                   lineHeight: 1.75,
                   fontSize: { xs: 14.75, md: 16.5 },
                   textAlign: { xs: "center", md: "left" },
-                  maxWidth: "none", // ✅ no restringir el 50%
+                  maxWidth: "none",
                 }}
               >
                 {subtitle}
@@ -399,7 +396,6 @@ function LandingSection({
           </Stack>
         </Box>
 
-        {/* IMAGEN (abajo en móvil) */}
         {hasMedia ? (
           <Box
             sx={{
@@ -418,35 +414,70 @@ function LandingSection({
   );
 }
 
+/** ✅ Badge de estadísticas (como en tus imágenes) */
+function StatsRow() {
+  const items = [
+    { value: "5,235", label: "Equipos Reparados" },
+    { value: "+1,500", label: "Clientes Satisfechos" },
+    { value: "23", label: "Años de Experiencia" },
+  ];
+
+  return (
+    <Grid container spacing={1.5} sx={{ mt: 2 }}>
+      {items.map((it) => (
+        <Grid key={it.label} item xs={12} sm={4}>
+          <Box
+            sx={{
+              borderRadius: 3,
+              border: `1px solid ${alpha(BRAND.accent, 0.14)}`,
+              background: alpha(BRAND.white, 0.92),
+              boxShadow: "0 16px 48px rgba(0,0,0,0.07)",
+              p: 2,
+              textAlign: "center",
+            }}
+          >
+            <Typography sx={{ fontWeight: 950, fontSize: { xs: 26, md: 30 }, color: BRAND.dark }}>
+              {it.value}
+            </Typography>
+            <Typography sx={{ color: alpha(BRAND.grey, 0.98), fontWeight: 800 }}>
+              {it.label}
+            </Typography>
+          </Box>
+        </Grid>
+      ))}
+    </Grid>
+  );
+}
+
 export default function InfoSitio() {
   const { store, sitio, carrusel } = usePublicSite();
 
-  const storeName = store?.name || "Perfumería Ángeles";
-  const title = sitio?.titulo_1 || "Perfumes 100% originales";
+  const storeName = store?.name || "Grupo Intercomp";
+  const title = sitio?.titulo_1 || "Intercomp";
   const description =
     sitio?.descripcion ||
-    "Compra fácil por WhatsApp, promos VIP y envíos a todo México. Sin complicarte.";
+    "Servicio profesional en equipos de cómputo. Reparación, redes y soluciones TI para negocio y hogar.";
 
-  // ✅ Carrusel: MISMA LÓGICA (index-based)
+  // Carrusel (si existe), si no: imágenes estáticas
   const carouselUrls = useMemo(() => {
     const arr = Array.isArray(carrusel) ? carrusel : [];
     return arr.map((x) => toAbs(pickCarouselUrl(x))).filter(Boolean);
   }, [carrusel]);
 
-  // índices como ya lo traías (1..4)
-  const imgExplora = carouselUrls?.[1] || "";
-  const imgEnvios = carouselUrls?.[2] || "";
-  const imgPagos = carouselUrls?.[3] || "";
-  const imgGarantia = carouselUrls?.[4] || "";
+  // ✅ FALLBACK a estáticas
+  const imgSomos = carouselUrls?.[0] || "/images/intercomp-somos.jpg";
+  const imgProductos = carouselUrls?.[1] || "/images/intercomp-productos.jpg";
+  const imgServicios = carouselUrls?.[2] || "/images/intercomp-servicios.jpg";
+  const imgGaleria = carouselUrls?.[3] || "/images/intercomp-galeria.jpg";
 
   const categorias = useMemo(
     () => [
-      "Perfumes Árabes",
-      "Perfumes de Diseñador",
-      "Perfumes de Dama",
-      "Perfumes de Caballero",
-      "Decants (muestras)",
-      "Venta a Mayoreo",
+      "Computadoras y Laptops",
+      "Accesorios y Hardware",
+      "Impresoras y Consumibles",
+      "Redes y Cámaras",
+      "Puntos de Venta",
+      "Servicio Técnico",
     ],
     []
   );
@@ -455,7 +486,7 @@ export default function InfoSitio() {
     <Box
       sx={{
         py: { xs: 4, md: 6 },
-        background: `linear-gradient(180deg, ${alpha(BRAND.soft, 0.55)}, ${BRAND.white} 55%)`,
+        background: `linear-gradient(180deg, ${alpha(BRAND.light, 0.90)}, ${BRAND.white} 55%)`,
       }}
     >
       <Container maxWidth="lg">
@@ -491,9 +522,9 @@ export default function InfoSitio() {
               mb: 1.5,
               px: 0.5,
               fontWeight: 950,
-              bgcolor: alpha(BRAND.accent, 0.10),
+              bgcolor: alpha(BRAND.accent, 0.08),
               borderColor: alpha(BRAND.accent, 0.20),
-              color: "#222",
+              color: BRAND.dark,
             }}
           />
 
@@ -504,7 +535,7 @@ export default function InfoSitio() {
               lineHeight: 1.08,
               mb: 1,
               fontSize: { xs: 30, md: 46 },
-              color: "#111",
+              color: BRAND.dark,
             }}
           >
             {title}
@@ -514,7 +545,7 @@ export default function InfoSitio() {
             sx={{
               mx: "auto",
               maxWidth: 900,
-              color: alpha(BRAND.grey, 0.95),
+              color: alpha(BRAND.grey, 0.98),
               lineHeight: 1.75,
               mb: 2.25,
               fontSize: { xs: 14.75, md: 16.5 },
@@ -524,51 +555,73 @@ export default function InfoSitio() {
           </Typography>
 
           <Stack direction={{ xs: "column", sm: "row" }} justifyContent="center" gap={1.5}>
-            {/* <PulseButton component={Link} href="/tienda" endIcon={<ArrowForwardIosRoundedIcon />}>
-              Ir al catálogo
-            </PulseButton> */}
+            <PulseButton
+              startIcon={<WhatsAppIcon />}
+              onClick={() => window.open("https://wa.me/527441276538", "_blank")}
+            >
+              WhatsApp
+            </PulseButton>
+
+            <Button
+              variant="outlined"
+              sx={{
+                borderRadius: 2.5,
+                fontWeight: 950,
+                textTransform: "none",
+                px: { xs: 2.6, md: 3 },
+                py: { xs: 1.2, md: 1.35 },
+                borderColor: alpha(BRAND.accent, 0.40),
+                color: BRAND.accent,
+                "&:hover": { bgcolor: alpha(BRAND.light, 0.65), borderColor: BRAND.accent },
+              }}
+              onClick={() => document.getElementById("contacto")?.scrollIntoView({ behavior: "smooth" })}
+            >
+              Contacto
+            </Button>
           </Stack>
+
+          <StatsRow />
         </Box>
 
-        {/* ================= SECCIÓN 1 ================= */}
+        {/* ================= SECCIÓN: SOMOS ================= */}
         <LandingSection
           flip={false}
           anim="slideLeft"
           kicker="Somos"
-          title="Compra seguro, rápido y sin vueltas."
-          subtitle="Asesoría humana por WhatsApp, promociones VIP y productos listos para envío. Aquí vienes a elegir y salir oliendo bien, no a sufrir."
-          mediaSrc={imgExplora}
-          mediaAlt="Explora"
-          mediaPos="center 35%"
+          title="Soluciones en Tecnologías de la Información."
+          subtitle="Empresa con 23 años de experiencia. Servicio profesional para negocio y hogar: mantenimiento y reparación de equipos de cómputo, instalación de puntos de venta, redes de computadoras y periféricos."
+          mediaSrc={imgSomos}
+          mediaAlt="Grupo Intercomp"
+          mediaPos="center 40%"
         >
           <BenefitBox
-            icon={<LocalOfferOutlinedIcon />}
-            title="Promos VIP reales"
-            desc="Promociones por temporada y mejores precios para recompra. Nada de “descuento fantasma”."
+            icon={<VerifiedOutlinedIcon />}
+            title="Atención profesional"
+            desc="Diagnóstico claro, trabajo bien hecho y solución en tiempos reales."
           />
 
           <FeatureList
             items={[
               {
-                icon: <WhatsAppIcon />,
-                title: "Atención por WhatsApp (humano)",
-                desc: "Te guiamos para elegir, cotizar y cerrar la compra sin complicarte.",
+                icon: <SupportAgentOutlinedIcon />,
+                title: "Asesoría directa",
+                desc: "Te orientamos para elegir la mejor solución (hardware, software o red).",
               },
               {
                 icon: <Inventory2OutlinedIcon />,
-                title: "Existencia lista para salir",
-                desc: "Inventario disponible para envío rápido (sin historias raras).",
+                title: "Refacciones y consumibles",
+                desc: "Accesorios, hardware e impresión según disponibilidad.",
               },
               {
-                icon: <VerifiedOutlinedIcon />,
-                title: "Confianza",
-                desc: "Productos originales, sellados y verificados.",
+                icon: <LocationOnOutlinedIcon />,
+                title: "Servicio local",
+                desc: "Atención en Tapachula y coordinación por WhatsApp.",
               },
             ]}
           />
         </LandingSection>
 
-        {/* ================= SECCIÓN 2: CATEGORÍAS ================= */}
+        {/* ================= SECCIÓN: PRODUCTOS / CATEGORÍAS ================= */}
         <Box
           component="section"
           sx={{
@@ -579,22 +632,16 @@ export default function InfoSitio() {
             px: { xs: 2.25, md: 3.25 },
             py: { xs: 2.5, md: 3 },
             mb: 3,
-            animation: "paFadeUp 700ms ease both",
-            "@keyframes paFadeUp": {
-              from: { opacity: 0, transform: "translateY(12px)" },
-              to: { opacity: 1, transform: "translateY(0)" },
-            },
-            "@media (prefers-reduced-motion: reduce)": { animation: "none" },
           }}
         >
           <Stack spacing={1} alignItems="center" sx={{ textAlign: "center" }}>
             <Chip
               icon={<CategoryOutlinedIcon />}
-              label="Categorías"
+              label="Productos"
               variant="outlined"
               sx={{
                 fontWeight: 950,
-                bgcolor: alpha(BRAND.accent, 0.10),
+                bgcolor: alpha(BRAND.accent, 0.08),
                 borderColor: alpha(BRAND.accent, 0.20),
               }}
             />
@@ -603,13 +650,13 @@ export default function InfoSitio() {
                 fontWeight: 950,
                 letterSpacing: -0.4,
                 fontSize: { xs: 22, md: 30 },
-                color: "#111",
+                color: BRAND.dark,
               }}
             >
-              Explora lo más buscado
+              Las mejores marcas al mejor precio
             </Typography>
-            <Typography sx={{ color: alpha(BRAND.grey, 0.95), maxWidth: 860, lineHeight: 1.75 }}>
-              Elige una categoría y entra directo al catálogo. Rápido, claro, sin perder tiempo.
+            <Typography sx={{ color: alpha(BRAND.grey, 0.98), maxWidth: 860, lineHeight: 1.75 }}>
+              Computadoras, accesorios, impresoras y consumibles. Pregunta por WhatsApp y te cotizamos rápido.
             </Typography>
           </Stack>
 
@@ -629,131 +676,87 @@ export default function InfoSitio() {
                 variant="outlined"
                 sx={{
                   fontWeight: 900,
-                  borderColor: alpha(BRAND.accent, 0.25),
-                  bgcolor: alpha(BRAND.soft, 0.45),
-                  color: "#222",
-                  "&:hover": { bgcolor: alpha(BRAND.soft, 0.75) },
+                  borderColor: alpha(BRAND.accent, 0.22),
+                  bgcolor: alpha(BRAND.light, 0.80),
+                  color: BRAND.dark,
+                  "&:hover": { bgcolor: alpha(BRAND.light, 1) },
                 }}
               />
             ))}
           </Box>
 
           <Box sx={{ mt: 2.25, display: "flex", justifyContent: "center" }}>
-            {/* <PulseButton component={Link} href="/tienda" endIcon={<ArrowForwardIosRoundedIcon />}>
-              Entrar al catálogo
-            </PulseButton> */}
+            <PulseButton startIcon={<WhatsAppIcon />} onClick={() => window.open("https://wa.me/527441276538", "_blank")}>
+              Cotizar por WhatsApp
+            </PulseButton>
           </Box>
         </Box>
 
-        {/* ================= SECCIÓN 3: ENVÍOS ================= */}
+        {/* ================= SECCIÓN: SERVICIOS ================= */}
         <LandingSection
           flip
           anim="slideRight"
-          kicker="Envíos"
-          title="Envíos a todo México."
-          subtitle="Cobertura nacional y opciones locales. Te decimos costos y tiempos por WhatsApp y listo."
-          mediaSrc={imgEnvios}
-          mediaAlt="Envíos"
+          kicker="Servicios"
+          title="Servicio garantizado en máximo 72 horas*"
+          subtitle="Solucionamos tu problema con diagnóstico y reparación profesional. (*Depende del daño y disponibilidad de refacciones.)"
+          mediaSrc={imgServicios}
+          mediaAlt="Nuestros servicios"
           mediaPos="center 45%"
         >
           <BenefitBox
-            icon={<LocalShippingOutlinedIcon />}
-            title="Logística clara"
-            desc="Te compartimos tiempos estimados y opciones según tu zona. Sin misterio."
+            icon={<LocalOfferOutlinedIcon />}
+            title="Servicio real, sin rodeos"
+            desc="Te decimos qué tiene tu equipo, cuánto cuesta y el tiempo estimado."
           />
 
           <FeatureList
             items={[
               {
-                icon: <LocalShippingOutlinedIcon />,
-                title: "República Mexicana",
-                desc: "Entrega estimada: 2 a 5 días hábiles (según paquetería).",
+                icon: <ComputerOutlinedIcon />,
+                title: "Reparación de PC",
+                desc: "Laptops y escritorio: pantallas, teclados, discos, RAM, mantenimiento y más.",
               },
               {
-                icon: <LocationOnOutlinedIcon />,
-                title: "Tapachula",
-                desc: "Entrega local mismo día o al siguiente (según zona y horario).",
+                icon: <LanOutlinedIcon />,
+                title: "Instalación de Redes de Cómputo",
+                desc: "Cableado, configuración, mantenimiento y redes estructuradas o inalámbricas.",
               },
               {
-                icon: <RequestQuoteOutlinedIcon />,
-                title: "Entrega / Recogida",
-                desc: "Coordinación directa por WhatsApp.",
+                icon: <SupportOutlinedIcon />,
+                title: "Asesoría Informática",
+                desc: "Soporte y recomendaciones en hardware, software y soluciones para negocio.",
               },
             ]}
           />
         </LandingSection>
 
-        {/* ================= SECCIÓN 4: PAGOS ================= */}
+        {/* ================= SECCIÓN: GALERÍA ================= */}
         <LandingSection
           flip={false}
           anim="zoomIn"
-          kicker="Pagos"
-          title="Paga como te convenga."
-          subtitle="Opciones simples y directas. Menos fricción, más perfume."
-          mediaSrc={imgPagos}
-          mediaAlt="Pagos"
+          kicker="Galería"
+          title="Trabajos reales, clientes reales."
+          subtitle="Mantenemos un compromiso fuerte con la calidad y nuestros clientes para satisfacer plenamente sus necesidades."
+          mediaSrc={imgGaleria}
+          mediaAlt="Galería de trabajos"
           mediaPos="center 40%"
         >
-          <BenefitBox
-            icon={<PaymentsOutlinedIcon />}
-            title="Métodos claros"
-            desc="Te confirmamos el método, el total y listo. Sin sorpresas."
-          />
-
-          <FeatureList
-            items={[
-              {
-                icon: <AccountBalanceOutlinedIcon />,
-                title: "Transferencia o depósito",
-                desc: "Rápido, directo y sin vueltas.",
-              },
-              {
-                icon: <PaymentsOutlinedIcon />,
-                title: "Efectivo",
-                desc: "Ideal para entrega local o acuerdos directos.",
-              },
-              {
-                icon: <CreditCardOutlinedIcon />,
-                title: "Tarjeta / Apartado",
-                desc: "Tarjeta puede aplicar comisión. Apartado con anticipo en productos seleccionados.",
-              },
-            ]}
-          />
-        </LandingSection>
-
-        {/* ================= SECCIÓN 5: GARANTÍA ================= */}
-        <LandingSection
-          flip
-          anim="pop"
-          kicker="Confianza"
-          title="Autenticidad y soporte."
-          subtitle="Productos originales y atención real. Políticas claras desde el inicio."
-          mediaSrc={imgGarantia}
-          mediaAlt="Garantía"
-          mediaPos="center 35%"
-        >
-          <BenefitBox
-            icon={<VerifiedOutlinedIcon />}
-            title="Compra con confianza"
-            desc="Sellados y verificados. Te orientamos antes de comprar para evitar dudas."
-          />
-
           <FeatureList
             items={[
               {
                 icon: <VerifiedOutlinedIcon />,
-                title: "Autenticidad garantizada",
-                desc: "Productos originales, sellados y verificados.",
+                title: "Calidad",
+                desc: "Procesos y diagnóstico con enfoque profesional.",
               },
               {
                 icon: <SupportAgentOutlinedIcon />,
-                title: "Soporte por WhatsApp",
-                desc: "Te ayudamos antes, durante y después de tu compra.",
+                title: "Atención",
+                desc: "Comunicación clara: avances y entrega del equipo.",
               },
               {
-                icon: <BlockOutlinedIcon />,
-                title: "Sin devoluciones",
-                desc: "Por tratarse de producto de uso personal. Te orientamos antes de comprar.",
+                icon: <RequestQuoteOutlinedIcon />,
+                title: "Cotización rápida",
+                desc: "Te decimos opciones y precios por WhatsApp.",
               },
             ]}
           />
@@ -761,6 +764,7 @@ export default function InfoSitio() {
 
         {/* ================= CTA FINAL ================= */}
         <Box
+          id="contacto"
           component="section"
           sx={{
             borderRadius: 3.5,
@@ -770,12 +774,6 @@ export default function InfoSitio() {
             px: { xs: 2.25, md: 3.5 },
             py: { xs: 2.75, md: 3.25 },
             textAlign: "center",
-            animation: "paFadeUp 700ms ease both",
-            "@keyframes paFadeUp": {
-              from: { opacity: 0, transform: "translateY(12px)" },
-              to: { opacity: 1, transform: "translateY(0)" },
-            },
-            "@media (prefers-reduced-motion: reduce)": { animation: "none" },
           }}
         >
           <Typography
@@ -783,49 +781,31 @@ export default function InfoSitio() {
               fontWeight: 950,
               letterSpacing: -0.4,
               fontSize: { xs: 22, md: 30 },
-              color: "#111",
+              color: BRAND.dark,
               mb: 1,
             }}
           >
-            ¿Listo para elegir tu aroma?
+            ¿Te cotizamos o revisamos tu equipo?
           </Typography>
 
           <Typography
             sx={{
-              color: alpha(BRAND.grey, 0.95),
+              color: alpha(BRAND.grey, 0.98),
               maxWidth: 860,
               mx: "auto",
               lineHeight: 1.75,
               mb: 2.25,
             }}
           >
-            Entra al catálogo y compra en minutos. Si quieres recomendación, te atendemos por WhatsApp.
+            Escríbenos por WhatsApp y te damos atención directa.
           </Typography>
 
           <Stack direction={{ xs: "column", sm: "row" }} justifyContent="center" gap={1.5}>
-            {/* <PulseButton component={Link} href="/tienda" endIcon={<ArrowForwardIosRoundedIcon />}>
-              Ir al catálogo
-            </PulseButton> */}
-{/* 
-            <Button
-              variant="outlined"
-              startIcon={<WhatsAppIcon />}
-              sx={{
-                borderRadius: 2.5,
-                fontWeight: 950,
-                textTransform: "none",
-                px: { xs: 2.6, md: 3 },
-                py: { xs: 1.2, md: 1.35 },
-                borderColor: alpha(BRAND.accent, 0.45),
-                color: BRAND.accent,
-                "&:hover": {
-                  borderColor: BRAND.accent,
-                  bgcolor: alpha(BRAND.soft, 0.55),
-                },
-              }}
-            >
-              Hablar por WhatsApp
-            </Button> */}
+            <PulseButton startIcon={<WhatsAppIcon />} onClick={() => window.open("https://wa.me/527441276538", "_blank")}>
+              WhatsApp
+            </PulseButton>
+
+
           </Stack>
         </Box>
       </Container>
