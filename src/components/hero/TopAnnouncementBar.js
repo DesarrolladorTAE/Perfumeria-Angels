@@ -21,12 +21,12 @@ const marquee = keyframes`
 export default function TopAnnouncementMarquee({
   height = 34,
   bg = "#E64B7A",
-  maxWidth = 1400,
+  maxWidth = "100%",
   duration = 18, // segundos (más alto = más lento)
 }) {
   const { branding, loading } = usePublicSite();
 
-  // 1) Texto fuente (una sola frase)
+  // 1) Texto fuente
   const raw = (branding?.descripcion || "").trim();
 
   const fallback =
@@ -34,7 +34,7 @@ export default function TopAnnouncementMarquee({
 
   const text = raw || fallback;
 
-  // 2) Partimos en “frases” para meter íconos dentro
+  // 2) Frases
   const segments = React.useMemo(() => {
     return String(text)
       .split(/\||•|\n|\r/g)
@@ -42,43 +42,48 @@ export default function TopAnnouncementMarquee({
       .filter(Boolean);
   }, [text]);
 
-  // 3) Íconos que se van alternando por frase
+  // 3) Pool de íconos
   const iconPool = React.useMemo(
     () => [
-      SpaRoundedIcon, // perfumes
-      LocalMallRoundedIcon, // shopping
-      LocalShippingRoundedIcon, // envíos
-      CreditCardRoundedIcon, // pagos
-      RedeemRoundedIcon, // regalos
-      LocalOfferRoundedIcon, // promos
+      SpaRoundedIcon,
+      LocalMallRoundedIcon,
+      LocalShippingRoundedIcon,
+      CreditCardRoundedIcon,
+      RedeemRoundedIcon,
+      LocalOfferRoundedIcon,
     ],
     []
   );
 
-  // Si está cargando, no pintes para evitar flash feo
   if (loading && !branding) return null;
 
-  // 4) Construye UNA sola “línea” con icono + frase + separador
+  // 4) Línea que sí ocupa ancho completo
   const Line = ({ offset = 0 }) => (
     <Stack
       direction="row"
       alignItems="center"
       spacing={1.2}
       sx={{
-        px: 2,
+        px: { xs: 2, md: 3 },
         whiteSpace: "nowrap",
         flexWrap: "nowrap",
+        minWidth: "100vw",
+        justifyContent: { xs: "flex-start", md: "space-around" },
       }}
     >
       {segments.map((t, i) => {
         const IconCmp = iconPool[(i + offset) % iconPool.length];
+
         return (
           <Stack
             key={`${t}-${i}-${offset}`}
             direction="row"
             alignItems="center"
             spacing={0.75}
-            sx={{ whiteSpace: "nowrap" }}
+            sx={{
+              whiteSpace: "nowrap",
+              flex: "0 0 auto",
+            }}
           >
             <Box
               sx={{
@@ -96,7 +101,7 @@ export default function TopAnnouncementMarquee({
 
             <Typography
               sx={{
-                fontSize: { xs: 11.2, sm: 12 },
+                fontSize: { xs: 11.2, sm: 12, md: 12.5, lg: 13 },
                 fontWeight: 900,
                 letterSpacing: 0.2,
                 color: "#fff",
@@ -105,7 +110,6 @@ export default function TopAnnouncementMarquee({
               {t}
             </Typography>
 
-            {/* separador entre frases */}
             <Typography
               sx={{
                 color: alpha("#fff", 0.55),
@@ -131,37 +135,36 @@ export default function TopAnnouncementMarquee({
         display: "flex",
         alignItems: "center",
         borderBottom: `1px solid ${alpha("#fff", 0.08)}`,
+        overflow: "hidden",
       }}
     >
       <Box
         sx={{
           width: "100%",
-          mx: "auto",
           maxWidth,
-          px: { xs: 0, sm: 1 },
+          px: 0,
           overflow: "hidden",
           position: "relative",
         }}
       >
-        {/* Track: duplicamos contenido para loop perfecto */}
+        {/* Track: ahora sí ocupa todo el ancho */}
         <Box
           sx={{
             display: "flex",
-            width: "max-content",
+            width: "200%",
             animation: `${marquee} ${duration}s linear infinite`,
             willChange: "transform",
-            "&:hover": { animationPlayState: "paused" }, // pausa al hover
+            "&:hover": { animationPlayState: "paused" },
             "@media (prefers-reduced-motion: reduce)": {
               animation: "none",
             },
           }}
         >
-          {/* IMPORTANTE: 2 copias iguales para que al llegar a -50% siga continuo */}
           <Line offset={0} />
-          <Line offset={1} />
+          <Line offset={0} />
         </Box>
 
-        {/* Fade sutil en bordes para que se vea pro */}
+        {/* Fade sutil en bordes */}
         <Box
           sx={{
             pointerEvents: "none",
@@ -169,8 +172,8 @@ export default function TopAnnouncementMarquee({
             inset: 0,
             background: `linear-gradient(90deg,
               ${bg} 0%,
-              transparent 10%,
-              transparent 90%,
+              transparent 6%,
+              transparent 94%,
               ${bg} 100%
             )`,
           }}

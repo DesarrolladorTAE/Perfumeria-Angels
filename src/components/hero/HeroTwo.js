@@ -41,37 +41,33 @@ function useImageSize(src) {
 export default function HeroTwo() {
   const { store, sitio, carrusel } = usePublicSite();
 
-  const desktopImg = useMemo(() => {
+  const desktopFallback = useMemo(() => {
     return (
-      toAbs(sitio?.img_portada) || "/assets/imags/backgrounds/main-slider-bg.jpg"
+      toAbs(sitio?.img_portada) || "/assets/images/backgrounds/portada.png"
     );
   }, [sitio?.img_portada]);
 
-  // ✅ carrusel[0] como antes (fallback base)
   const carrusel0 = useMemo(() => {
     const first = carrusel?.[0];
-    return toAbs(first) || desktopImg;
-  }, [carrusel, desktopImg]);
+    return toAbs(first) || desktopFallback;
+  }, [carrusel, desktopFallback]);
 
-  // ✅ Grupo 6..9 (si existen)
-const heroImgs = useMemo(() => {
-  if (!Array.isArray(carrusel)) return [carrusel0];
+  // Grupo de imágenes para slider
+  const heroImgs = useMemo(() => {
+    if (!Array.isArray(carrusel)) return [carrusel0];
 
-  const indices = [0, 6, 7, 8, 9];
+    const indices = [0, 6, 7, 8, 9];
 
-  const imgs = indices
-    .map((i) => carrusel[i])
-    .filter(Boolean)
-    .map(toAbs);
+    const imgs = indices
+      .map((i) => carrusel[i])
+      .filter(Boolean)
+      .map(toAbs);
 
-  return imgs.length ? imgs : [carrusel0];
-}, [carrusel, carrusel0]);
+    return imgs.length ? imgs : [carrusel0];
+  }, [carrusel, carrusel0]);
 
-
-  // Índice del slide (controlado por usuario)
   const [idx, setIdx] = useState(0);
 
-  // Si cambia la lista (por carga async), resetea idx
   useEffect(() => {
     setIdx(0);
   }, [heroImgs.length]);
@@ -84,61 +80,59 @@ const heroImgs = useMemo(() => {
     setIdx((p) => (p + 1) % heroImgs.length);
   }, [heroImgs.length]);
 
-  // Soporte teclado (opcional, pero útil)
   useEffect(() => {
     const onKey = (e) => {
       if (heroImgs.length <= 1) return;
       if (e.key === "ArrowLeft") prev();
       if (e.key === "ArrowRight") next();
     };
+
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [heroImgs.length, prev, next]);
 
-  // ✅ Mobile: slide actual
-  const mobileImg = useMemo(() => {
-    return heroImgs[idx] || carrusel0;
-  }, [heroImgs, idx, carrusel0]);
+  // Imagen activa para móvil y escritorio
+  const activeImg = useMemo(() => {
+    return heroImgs[idx] || carrusel0 || desktopFallback;
+  }, [heroImgs, idx, carrusel0, desktopFallback]);
 
   const title = sitio?.titulo_1 || store?.name || "Perfumería";
   const description =
     sitio?.descripcion ||
     "Perfumes originales, asesoría por WhatsApp y envíos a todo México.";
 
-  // Detectar ratio real del móvil (según el slide actual)
-  const { w: mw, h: mh } = useImageSize(mobileImg);
+  // Detectar ratio real de la imagen activa
+  const { w, h } = useImageSize(activeImg);
 
-  const mobileRatio = useMemo(() => {
-    if (!mw || !mh) return null;
-    return mw / mh;
-  }, [mw, mh]);
+  const imageRatio = useMemo(() => {
+    if (!w || !h) return null;
+    return w / h;
+  }, [w, h]);
 
-  const mobileAspectRatio = useMemo(() => {
-    if (!mw || !mh) return null;
-    return `${mw} / ${mh}`;
-  }, [mw, mh]);
+  const imageAspectRatio = useMemo(() => {
+    if (!w || !h) return null;
+    return `${w} / ${h}`;
+  }, [w, h]);
 
-  // Flyer/banner: muy horizontal => contain y sin espacio
   const isBannerImage = useMemo(() => {
-    if (!mobileRatio) return false;
-    return mobileRatio > 1.25;
-  }, [mobileRatio]);
+    if (!imageRatio) return false;
+    return imageRatio > 1.25;
+  }, [imageRatio]);
 
-  // Ajustes para móviles cuando NO es banner
   const mobileFit = useMemo(() => {
     let objectFit = "cover";
     let objectPosition = "center 20%";
     let minHeight = 430;
 
-    if (!mobileRatio) return { objectFit, objectPosition, minHeight };
+    if (!imageRatio) return { objectFit, objectPosition, minHeight };
 
-    if (mobileRatio < 0.85) {
+    if (imageRatio < 0.85) {
       objectPosition = "center top";
       minHeight = 460;
-    } else if (mobileRatio <= 1.05) {
+    } else if (imageRatio <= 1.05) {
       objectPosition = "center center";
       minHeight = 420;
-    } else if (mobileRatio <= 1.35) {
+    } else if (imageRatio <= 1.35) {
       objectPosition = "center 30%";
       minHeight = 380;
     } else {
@@ -147,7 +141,7 @@ const heroImgs = useMemo(() => {
     }
 
     return { objectFit, objectPosition, minHeight };
-  }, [mobileRatio]);
+  }, [imageRatio]);
 
   const heroClass = useMemo(() => {
     return `pa-hero ${isBannerImage ? "pa-hero--banner" : ""}`;
@@ -172,17 +166,16 @@ const heroImgs = useMemo(() => {
           inset: 0;
           width: 100%;
           height: 100%;
-          object-fit: contain; /* desktop: no pierde nada */
+          object-fit: contain;
           object-position: center center;
           background: #fff;
         }
 
-        /* Capa para botones */
         .pa-hero__overlay {
           position: absolute;
           inset: 0;
           z-index: 5;
-          pointer-events: none; /* para que solo botones reciban click */
+          pointer-events: none;
         }
 
         .navBtn {
@@ -240,7 +233,6 @@ const heroImgs = useMemo(() => {
           margin-right: 3px;
         }
 
-        /* Indicadores (puntitos) opcional */
         .dots {
           pointer-events: auto;
           position: absolute;
@@ -263,6 +255,7 @@ const heroImgs = useMemo(() => {
           border-radius: 999px;
           background: rgba(255, 255, 255, 0.45);
         }
+
         .dot--on {
           background: rgba(255, 255, 255, 0.95);
         }
@@ -274,7 +267,6 @@ const heroImgs = useMemo(() => {
           z-index: 2;
         }
 
-        /* ✅ MOBILE GENERAL (NO banner) */
         @media (max-width: 991px) {
           .pa-hero:not(.pa-hero--banner) {
             min-height: ${mobileFit.minHeight}px;
@@ -296,12 +288,11 @@ const heroImgs = useMemo(() => {
           }
         }
 
-        /* ✅ MOBILE BANNER (SIN ESPACIOS BLANCOS) */
         @media (max-width: 991px) {
           .pa-hero--banner {
             min-height: 0 !important;
             height: auto;
-            ${mobileAspectRatio ? `aspect-ratio: ${mobileAspectRatio};` : ""}
+            ${imageAspectRatio ? `aspect-ratio: ${imageAspectRatio};` : ""}
             display: block;
           }
 
@@ -311,7 +302,6 @@ const heroImgs = useMemo(() => {
             background: transparent;
           }
 
-          /* si no estás mostrando textos, esto QUITA el padding que infla el alto */
           .pa-hero--banner .pa-hero__content {
             padding: 0 !important;
             height: 0;
@@ -319,7 +309,6 @@ const heroImgs = useMemo(() => {
           }
         }
 
-        /* Accesibilidad: oculto visual pero no para lectores */
         .srOnly {
           position: absolute;
           width: 1px;
@@ -334,27 +323,41 @@ const heroImgs = useMemo(() => {
       `}</style>
 
       <section className={heroClass}>
-        <picture>
-          <source media="(max-width: 991px)" srcSet={mobileImg} />
-          <img className="pa-hero__media" src={desktopImg} alt={title} loading="eager" />
-        </picture>
+        <img
+          className="pa-hero__media"
+          src={activeImg}
+          alt={title}
+          loading="eager"
+        />
 
-        {/* ✅ Flechas + dots arriba de la imagen */}
         {canSlide && (
           <div className="pa-hero__overlay">
-            <button className="navBtn navBtn--left" onClick={prev} aria-label="Anterior">
+            <button
+              className="navBtn navBtn--left"
+              onClick={prev}
+              aria-label="Anterior"
+              type="button"
+            >
               <span className="srOnly">Anterior</span>
               <span className="navIcon navIcon--left" />
             </button>
 
-            <button className="navBtn navBtn--right" onClick={next} aria-label="Siguiente">
+            <button
+              className="navBtn navBtn--right"
+              onClick={next}
+              aria-label="Siguiente"
+              type="button"
+            >
               <span className="srOnly">Siguiente</span>
               <span className="navIcon navIcon--right" />
             </button>
 
             <div className="dots" aria-label="Indicadores">
               {heroImgs.map((_, i) => (
-                <span key={i} className={`dot ${i === idx ? "dot--on" : ""}`} />
+                <span
+                  key={i}
+                  className={`dot ${i === idx ? "dot--on" : ""}`}
+                />
               ))}
             </div>
           </div>
@@ -363,7 +366,6 @@ const heroImgs = useMemo(() => {
         <div className="container">
           <div className="pa-hero__content">
             <div className="pa-hero__inner">
-              {/* Textos opcionales */}
               {/* <h1 className="pa-hero__title">{title}</h1>
               <p className="pa-hero__desc">{description}</p>
               <Link href="/tienda" className="pa-hero__btn">

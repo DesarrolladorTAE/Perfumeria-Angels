@@ -22,7 +22,6 @@ import AutoAwesomeRoundedIcon from "@mui/icons-material/AutoAwesomeRounded";
 import LocalFireDepartmentRoundedIcon from "@mui/icons-material/LocalFireDepartmentRounded";
 import StarRoundedIcon from "@mui/icons-material/StarRounded";
 import AllInclusiveRoundedIcon from "@mui/icons-material/AllInclusiveRounded";
-
 import LocalOfferRoundedIcon from "@mui/icons-material/LocalOfferRounded";
 import NewReleasesRoundedIcon from "@mui/icons-material/NewReleasesRounded";
 
@@ -35,12 +34,42 @@ import PaginationBar from "./PaginationBar";
 
 const PAGE_SIZE = 16;
 
+/* =========================================================
+   Helpers
+========================================================= */
+function normalizeText(value) {
+  return String(value || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "") // quita acentos
+    .toLowerCase()
+    .trim();
+}
+
+function toSlug(value) {
+  return normalizeText(value)
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-");
+}
+
+function getCategoryFromQuery(rawCat, options = []) {
+  if (!rawCat || !options.length) return null;
+
+  const querySlug = toSlug(rawCat);
+
+  const found = options.find((name) => {
+    if (!name || name === "Todas") return false;
+    return toSlug(name) === querySlug || normalizeText(name) === normalizeText(rawCat);
+  });
+
+  return found || null;
+}
+
 /** ✅ Card mini para Novedades: MISMO look que ProductCard, pero CTA "Mostrar detalles" */
 function NovedadMiniCard({ p, onOpen }) {
   const cover = pickCover(p?.image);
   const dc = calcDiscount(p?.price, p?.discount);
 
-  // igual que ProductCard (compacto)
   const CARD_H = { xs: 292, sm: 310, md: 360 };
   const MEDIA_H = { xs: 132, sm: 145, md: 190 };
   const TITLE_LINES = 2;
@@ -78,7 +107,6 @@ function NovedadMiniCard({ p, onOpen }) {
         if (e.key === "Enter" || e.key === " ") handleOpen();
       }}
     >
-      {/* ===== BADGES (NEW + DESCUENTO) ===== */}
       {(p?.new || dc.has) && (
         <Stack
           spacing={0.4}
@@ -125,7 +153,6 @@ function NovedadMiniCard({ p, onOpen }) {
         </Stack>
       )}
 
-      {/* ===== MEDIA ===== */}
       <Box sx={{ height: MEDIA_H, bgcolor: "#fff", overflow: "hidden" }}>
         {cover ? (
           <img
@@ -155,7 +182,6 @@ function NovedadMiniCard({ p, onOpen }) {
         )}
       </Box>
 
-      {/* ===== CONTENT ===== */}
       <Box
         sx={{
           flex: 1,
@@ -166,7 +192,6 @@ function NovedadMiniCard({ p, onOpen }) {
           flexDirection: "column",
         }}
       >
-        {/* Título */}
         <Typography
           sx={{
             fontWeight: 900,
@@ -183,12 +208,10 @@ function NovedadMiniCard({ p, onOpen }) {
           {p?.name || "Sin nombre"}
         </Typography>
 
-        {/* Rating */}
         <Stack direction="row" alignItems="center" spacing={0.6} sx={{ mt: 0.55 }}>
           <Rating size="small" value={Number(p?.rating || 0)} precision={0.5} readOnly />
         </Stack>
 
-        {/* Precio */}
         <Stack direction="row" alignItems="baseline" spacing={0.9} sx={{ mt: 0.8 }}>
           {dc.has && (
             <Typography
@@ -208,7 +231,6 @@ function NovedadMiniCard({ p, onOpen }) {
           </Typography>
         </Stack>
 
-        {/* CTA: solo detalles */}
         <Button
           fullWidth
           variant="contained"
@@ -274,7 +296,7 @@ function NovedadesStrip({ items, onOpen, onGoAll }) {
             xs: items.length === 1 ? "1fr" : "repeat(2, minmax(0, 1fr))",
             sm: "repeat(2, minmax(0, 1fr))",
           },
-          gap: 1.2, // igual que tu grid mobile
+          gap: 1.2,
           alignItems: "stretch",
           "& > *": { minWidth: 0 },
         }}
@@ -296,6 +318,9 @@ export default function StoreCatalog({ routeSku = null }) {
 
   const skuFromQuery =
     router.isReady && typeof router.query?.sku === "string" ? router.query.sku : null;
+
+  const catFromQuery =
+    router.isReady && typeof router.query?.cat === "string" ? router.query.cat : null;
 
   const activeSku = routeSku || skuFromQuery;
 
@@ -349,6 +374,27 @@ export default function StoreCatalog({ routeSku = null }) {
     return ["Todas", ...namesFromEndpoint];
   }, [cats]);
 
+  /* =========================================================
+     ✅ Aplicar categoría automáticamente desde ?cat=
+  ========================================================= */
+  React.useEffect(() => {
+    if (!router.isReady) return;
+    if (!catOptions.length) return;
+
+    if (!catFromQuery) {
+      setCatName("Todas");
+      return;
+    }
+
+    const matchedCategory = getCategoryFromQuery(catFromQuery, catOptions);
+
+    if (matchedCategory) {
+      setCatName((prev) => (prev !== matchedCategory ? matchedCategory : prev));
+    } else {
+      setCatName("Todas");
+    }
+  }, [router.isReady, catFromQuery, catOptions]);
+
   const baseFiltered = React.useMemo(() => {
     const qq = String(q || "").trim().toLowerCase();
 
@@ -359,7 +405,9 @@ export default function StoreCatalog({ routeSku = null }) {
       const matchQ = !qq || name.includes(qq) || sku.includes(qq);
 
       const pcats = Array.isArray(p?.category) ? p.category : [];
-      const matchCat = catName === "Todas" || pcats.includes(catName);
+      const matchCat =
+        catName === "Todas" ||
+        pcats.some((cat) => normalizeText(cat) === normalizeText(catName));
 
       return matchQ && matchCat;
     });
@@ -380,7 +428,6 @@ export default function StoreCatalog({ routeSku = null }) {
     [baseFiltered]
   );
 
-  // ✅ SOLO mostrar Novedades si hay 1 o 2 items
   const novedadesTop = React.useMemo(() => {
     const arr = Array.isArray(novedades) ? novedades : [];
     return arr.slice(0, 2);
@@ -479,18 +526,59 @@ export default function StoreCatalog({ routeSku = null }) {
   );
 
   const closeDetail = React.useCallback(() => {
-    router.push("/tienda", undefined, { shallow: true });
-  }, [router]);
+    const nextQuery = {};
 
-  // ✅ "Ver todos" SOLO en Novedades => ir a Destacados (y scroll)
+    if (catName && catName !== "Todas") {
+      nextQuery.cat = toSlug(catName);
+    }
+
+    router.push(
+      {
+        pathname: "/tienda",
+        query: nextQuery,
+      },
+      undefined,
+      { shallow: true }
+    );
+  }, [router, catName]);
+
   const goFromNovedadesToNovedad = React.useCallback(() => {
-    setTab("novedad"); // ✅ ahora sí manda a Novedad
+    setTab("novedad");
     setPage(1);
     if (typeof window !== "undefined") {
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
   }, []);
 
+  /* =========================================================
+     ✅ Setter de categoría que también actualiza la URL
+  ========================================================= */
+  const handleSetCatName = React.useCallback(
+    (nextCat) => {
+      setCatName(nextCat);
+      setPage(1);
+
+      if (!router.isReady) return;
+
+      const nextQuery = { ...router.query };
+
+      if (!nextCat || nextCat === "Todas") {
+        delete nextQuery.cat;
+      } else {
+        nextQuery.cat = toSlug(nextCat);
+      }
+
+      router.replace(
+        {
+          pathname: router.pathname,
+          query: nextQuery,
+        },
+        undefined,
+        { shallow: true }
+      );
+    },
+    [router]
+  );
 
   const pageBg = `linear-gradient(180deg, ${alpha(PALETTE.white, 0.8)} 0%, ${PALETTE.white} 55%, ${PALETTE.white} 100%)`;
 
@@ -502,7 +590,7 @@ export default function StoreCatalog({ routeSku = null }) {
           setQ={setQ}
           catOptions={catOptions}
           catName={catName}
-          setCatName={setCatName}
+          setCatName={handleSetCatName}
           tab={tab}
           setTab={setTab}
           tabs={tabs}
@@ -532,18 +620,34 @@ export default function StoreCatalog({ routeSku = null }) {
         ) : (
           <Fade in timeout={220} key={`${tab}-${catName}-${q}-${page}`}>
             <Box sx={{ mt: 2 }}>
-              {/* ✅ Novedades tipo “Home”, solo en "todos" y si hay 1–2 */}
               {tab === "todos" && showNovedades ? (
                 <NovedadesStrip
                   items={novedadesTop}
                   onOpen={openProduct}
                   onGoAll={goFromNovedadesToNovedad}
                 />
-
               ) : null}
 
               {isDesktop ? (
-                <DesktopProductRows items={pageItems} onOpen={openProduct} />
+                <>
+                  {pageItems.length ? (
+                    <DesktopProductRows items={pageItems} onOpen={openProduct} />
+                  ) : (
+                    <Box
+                      sx={{
+                        mt: 1,
+                        p: 2.2,
+                        borderRadius: 2.5,
+                        background: alpha(PALETTE.white, 0.8),
+                        border: `1px dashed ${alpha(PALETTE.grey, 0.25)}`,
+                      }}
+                    >
+                      <Typography sx={{ fontWeight: 900, color: alpha(PALETTE.grey, 0.75) }}>
+                        No hay productos con esos filtros.
+                      </Typography>
+                    </Box>
+                  )}
+                </>
               ) : (
                 <Box
                   sx={{
