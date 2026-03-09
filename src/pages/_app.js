@@ -11,12 +11,10 @@ const ScrollToTop = dynamic(() => import("react-scroll-to-top"), { ssr: false })
 
 function MyApp({ Component, pageProps }) {
   useEffect(() => {
-    // ✅ Solo en cliente
     const t = setTimeout(() => {
       try {
         animationCreate();
       } catch (e) {
-        // evita romper la app si la animación falla
         // eslint-disable-next-line no-console
         console.warn("animationCreate error:", e);
       }
@@ -27,22 +25,12 @@ function MyApp({ Component, pageProps }) {
 
   return (
     <>
-      {/* ✅ Head global (opcional): OG genérico para la tienda.
-          Para OG dinámico por producto, va en pages/tienda/[sku].jsx */}
       <Head>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-        {/* OG/Twitter genéricos (cámbialos a tu dominio/imagen reales) */}
-        <meta property="og:title" content="Perfumería Angels" />
-        <meta property="og:description" content="Compra perfumes y fragancias en línea." />
-        <meta property="og:type" content="website" />
-        <meta property="og:image" content="https://tudominio.com/og-default.jpg" />
-        <meta property="og:url" content="https://tudominio.com/tienda" />
-
+        {/* ✅ Opcional: twitter card genérico como fallback.
+            El OG dinámico del producto se define en pages/tienda/[sku].jsx */}
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="Perfumería Angels" />
-        <meta name="twitter:description" content="Compra perfumes y fragancias en línea." />
-        <meta name="twitter:image" content="https://tudominio.com/og-default.jpg" />
       </Head>
 
       <CartProvider>

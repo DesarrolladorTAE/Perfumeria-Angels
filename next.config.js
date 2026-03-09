@@ -3,7 +3,7 @@ const nextConfig = {
   reactStrictMode: true,
 
   // export estático
-  output: "export",
+  // output: "export",
   trailingSlash: true,          // ✅ CLAVE para que /tienda/ funcione
 
   images: { unoptimized: true },
