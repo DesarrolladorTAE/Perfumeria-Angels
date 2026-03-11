@@ -10,13 +10,14 @@ export default function TiendaPage({ routeSku = null }) {
     <>
       <SEO pageTitle={"Tienda"} />
       <HeaderOne />
-     
-      <TopAnnouncementMarquee/>
+      <TopAnnouncementMarquee />
+      <HeroTwo />
 
-       <HeroTwo />
-
-      {/* Catalogo de Productos */}
-      <StoreCatalog routeSku={routeSku} />
+      <StoreCatalog
+        routeSku={routeSku}
+        storeSlug="perfumeria-angels"
+        branchId={220}
+      />
 
       <FooterOne />
     </>

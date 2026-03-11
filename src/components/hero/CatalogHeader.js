@@ -34,6 +34,7 @@ export default function CatalogHeader({
   tabs,
   tabItemsCount,
   onReload,
+  promoOptionValue = "__PROMOCIONES__",
 }) {
   const theme = useTheme();
   const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
@@ -43,14 +44,11 @@ export default function CatalogHeader({
       sx={{
         borderRadius: { xs: 2.6, md: 3.2 },
         overflow: "hidden",
-
-        // ✅ negro sólido
         background: "#000",
         border: `1px solid ${alpha("#fff", 0.12)}`,
         boxShadow: "0 22px 70px rgba(0,0,0,0.35)",
       }}
     >
-      {/* ===== TOP BAR ===== */}
       <Box
         sx={{
           px: { xs: 1.2, md: 2 },
@@ -81,14 +79,13 @@ export default function CatalogHeader({
                 fontSize: { xs: 12, md: 14 },
               }}
             >
-              Perfumes, novedades y ofertas ·{" "}
+              Perfumes, novedades, promociones y ofertas ·{" "}
               <Box component="span" sx={{ color: PALETTE.accent, fontWeight: 900 }}>
                 {tabItemsCount}
               </Box>
             </Typography>
           </Box>
 
-          {/* Recargar */}
           {isDesktop ? (
             <Button
               onClick={onReload}
@@ -122,14 +119,12 @@ export default function CatalogHeader({
         </Stack>
       </Box>
 
-      {/* ===== BODY ===== */}
       <Box sx={{ p: { xs: 1.2, md: 2 }, background: "#000" }}>
         <Stack spacing={{ xs: 1, md: 1.2 }}>
-          {/* Search */}
           <TextField
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder="Busca tu favorito …"
+            placeholder="Busca tu favorito o una promoción…"
             size="small"
             fullWidth
             sx={{
@@ -156,7 +151,6 @@ export default function CatalogHeader({
             }}
           />
 
-          {/* Categorías */}
           {isDesktop ? (
             <Stack
               direction="row"
@@ -171,6 +165,31 @@ export default function CatalogHeader({
                 },
               }}
             >
+              <Chip
+                label="🔥 Promociones"
+                onClick={() => setCatName(promoOptionValue)}
+                sx={{
+                  fontWeight: 1000,
+                  borderRadius: 999,
+                  bgcolor:
+                    catName === promoOptionValue
+                      ? PALETTE.accent
+                      : alpha(PALETTE.accent, 0.18),
+                  color: "#fff",
+                  border: `1px solid ${alpha(PALETTE.accent, 0.55)}`,
+                  boxShadow:
+                    catName === promoOptionValue
+                      ? `0 0 0 3px ${alpha(PALETTE.accent, 0.18)}`
+                      : "none",
+                  "&:hover": {
+                    bgcolor:
+                      catName === promoOptionValue
+                        ? PALETTE.accent
+                        : alpha(PALETTE.accent, 0.24),
+                  },
+                }}
+              />
+
               {catOptions.map((name) => {
                 const active = catName === name;
                 return (
@@ -183,7 +202,9 @@ export default function CatalogHeader({
                       borderRadius: 999,
                       bgcolor: active ? PALETTE.accent : alpha("#fff", 0.06),
                       color: active ? "#fff" : alpha("#fff", 0.88),
-                      border: `1px solid ${active ? alpha(PALETTE.accent, 0.7) : alpha("#fff", 0.14)}`,
+                      border: `1px solid ${
+                        active ? alpha(PALETTE.accent, 0.7) : alpha("#fff", 0.14)
+                      }`,
                       "&:hover": {
                         bgcolor: active ? PALETTE.accent : alpha("#fff", 0.1),
                       },
@@ -208,6 +229,8 @@ export default function CatalogHeader({
                   "& .MuiSvgIcon-root": { color: alpha("#fff", 0.75) },
                 }}
               >
+                <MenuItem value={promoOptionValue}>🔥 Promociones</MenuItem>
+
                 {catOptions.map((name) => (
                   <MenuItem key={name} value={name}>
                     {name}
@@ -219,10 +242,8 @@ export default function CatalogHeader({
 
           <Divider sx={{ opacity: 0.25, borderColor: alpha("#fff", 0.18) }} />
 
-          {/* Tabs */}
           <Box
             sx={{
-              // ✅ Esto hace que se note más el bloque de tabs (la flecha que te señalaron)
               p: 0.8,
               borderRadius: 2.2,
               background: alpha("#fff", 0.05),
@@ -232,7 +253,6 @@ export default function CatalogHeader({
             <GhostTabs value={tab} onChange={(v) => setTab(v)} tabs={tabs} />
           </Box>
 
-          {/* Aux chip */}
           <Stack direction="row" spacing={1} alignItems="center" sx={{ pt: 0.2 }}>
             {tab === "ofertas" ? (
               <Chip
@@ -244,6 +264,21 @@ export default function CatalogHeader({
                   bgcolor: PALETTE.accent,
                   color: "#fff",
                   border: `1px solid ${alpha("#000", 0.35)}`,
+                  "& .MuiChip-icon": { color: "#fff" },
+                }}
+              />
+            ) : null}
+
+            {catName === promoOptionValue ? (
+              <Chip
+                size="small"
+                icon={<LocalOfferRoundedIcon sx={{ fontSize: 16 }} />}
+                label="Mostrando promociones"
+                sx={{
+                  fontWeight: 950,
+                  bgcolor: alpha(PALETTE.accent, 0.18),
+                  color: "#fff",
+                  border: `1px solid ${alpha(PALETTE.accent, 0.45)}`,
                   "& .MuiChip-icon": { color: "#fff" },
                 }}
               />

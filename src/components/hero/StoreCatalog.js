@@ -24,6 +24,7 @@ import StarRoundedIcon from "@mui/icons-material/StarRounded";
 import AllInclusiveRoundedIcon from "@mui/icons-material/AllInclusiveRounded";
 import LocalOfferRoundedIcon from "@mui/icons-material/LocalOfferRounded";
 import NewReleasesRoundedIcon from "@mui/icons-material/NewReleasesRounded";
+import BoltRoundedIcon from "@mui/icons-material/BoltRounded";
 
 import { PALETTE, calcDiscount, moneyMXN, pickCover } from "@/utils/catalogUtils";
 import CatalogHeader from "./CatalogHeader";
@@ -33,14 +34,13 @@ import DetailDialog from "./DetailDialog";
 import PaginationBar from "./PaginationBar";
 
 const PAGE_SIZE = 16;
+const DEFAULT_BRANCH_ID = 220;
+const PROMO_OPTION = "__PROMOCIONES__";
 
-/* =========================================================
-   Helpers
-========================================================= */
 function normalizeText(value) {
   return String(value || "")
     .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "") // quita acentos
+    .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase()
     .trim();
 }
@@ -65,7 +65,6 @@ function getCategoryFromQuery(rawCat, options = []) {
   return found || null;
 }
 
-/** ✅ Card mini para Novedades: MISMO look que ProductCard, pero CTA "Mostrar detalles" */
 function NovedadMiniCard({ p, onOpen }) {
   const cover = pickCover(p?.image);
   const dc = calcDiscount(p?.price, p?.discount);
@@ -258,6 +257,188 @@ function NovedadMiniCard({ p, onOpen }) {
   );
 }
 
+function PromoMiniCard({ promo, onOpen }) {
+  const handleOpen = React.useCallback(() => {
+    if (!promo?.slug) return;
+    onOpen?.(promo);
+  }, [onOpen, promo]);
+
+  const promoImage = String(promo?.image || "").trim();
+
+  return (
+    <Box
+      onClick={handleOpen}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") handleOpen();
+      }}
+      sx={{
+        width: "100%",
+        minWidth: 0,
+        height: { xs: 290, sm: 310, md: 340 },
+        borderRadius: 2,
+        overflow: "hidden",
+        cursor: "pointer",
+        display: "flex",
+        flexDirection: "column",
+        position: "relative",
+        bgcolor: "#111",
+        border: `1px solid ${alpha(PALETTE.accent, 0.25)}`,
+        boxShadow: "0 10px 28px rgba(0,0,0,0.20)",
+        transition: "transform .15s ease, box-shadow .15s ease",
+        "&:hover": {
+          transform: "translateY(-1px)",
+          boxShadow: "0 14px 34px rgba(0,0,0,0.24)",
+        },
+      }}
+    >
+      <Stack
+        direction="row"
+        spacing={0.6}
+        sx={{
+          position: "absolute",
+          top: 10,
+          left: 10,
+          zIndex: 3,
+        }}
+      >
+        <Chip
+          size="small"
+          icon={<LocalOfferRoundedIcon sx={{ fontSize: 14 }} />}
+          label="PROMO"
+          sx={{
+            height: 22,
+            fontSize: 10,
+            fontWeight: 900,
+            bgcolor: PALETTE.accent,
+            color: "#fff",
+            "& .MuiChip-icon": { color: "#fff" },
+          }}
+        />
+      </Stack>
+
+      <Box
+        sx={{
+          height: { xs: 140, sm: 150, md: 175 },
+          width: "100%",
+          bgcolor: "#0b0b0b",
+          overflow: "hidden",
+          position: "relative",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          p: 1,
+        }}
+      >
+        {promoImage ? (
+          <Box
+            component="img"
+            src={promoImage}
+            alt={promo?.name || "Promoción"}
+            onError={(e) => {
+              console.error("No cargó imagen promo:", promoImage);
+              e.currentTarget.style.display = "none";
+            }}
+            sx={{
+              width: "100%",
+              height: "100%",
+              objectFit: "contain",
+              objectPosition: "center",
+              display: "block",
+            }}
+          />
+        ) : (
+          <Box
+            sx={{
+              width: "100%",
+              height: "100%",
+              display: "grid",
+              placeItems: "center",
+              color: alpha("#fff", 0.65),
+              fontWeight: 800,
+            }}
+          >
+            Sin imagen
+          </Box>
+        )}
+
+        <Box
+          sx={{
+            position: "absolute",
+            inset: 0,
+            background:
+              "linear-gradient(180deg, rgba(0,0,0,0.02) 0%, rgba(0,0,0,0.18) 100%)",
+            pointerEvents: "none",
+          }}
+        />
+      </Box>
+
+      <Box
+        sx={{
+          flex: 1,
+          p: 1.4,
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "flex-end",
+          background: "linear-gradient(180deg, #161616 0%, #0b0b0b 100%)",
+        }}
+      >
+        <Typography
+          sx={{
+            color: "#fff",
+            fontWeight: 1000,
+            fontSize: { xs: 16, md: 19 },
+            lineHeight: 1.1,
+          }}
+        >
+          {promo?.name || "Promoción"}
+        </Typography>
+
+        <Typography
+          sx={{
+            mt: 0.6,
+            color: alpha("#fff", 0.88),
+            fontWeight: 700,
+            fontSize: 12.5,
+            minHeight: 40,
+            display: "-webkit-box",
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: "vertical",
+            overflow: "hidden",
+          }}
+        >
+          {promo?.description || "Aprovecha esta promoción especial"}
+        </Typography>
+
+        <Button
+          fullWidth
+          variant="contained"
+          startIcon={<BoltRoundedIcon />}
+          sx={{
+            mt: 1.2,
+            borderRadius: 1.5,
+            fontWeight: 950,
+            bgcolor: PALETTE.accent,
+            color: "#fff",
+            textTransform: "none",
+            boxShadow: "none",
+            "&:hover": {
+              bgcolor: alpha(PALETTE.accent, 0.92),
+            },
+          }}
+          onClick={(e) => {
+            e.stopPropagation();
+            handleOpen();
+          }}
+        >
+          Ver promoción
+        </Button>
+      </Box>
+    </Box>
+  );
+}
+
 function NovedadesStrip({ items, onOpen, onGoAll }) {
   return (
     <Box sx={{ mt: 2 }}>
@@ -313,7 +494,77 @@ function NovedadesStrip({ items, onOpen, onGoAll }) {
   );
 }
 
-export default function StoreCatalog({ routeSku = null }) {
+function PromosStrip({ items, onOpen, onGoAll }) {
+  if (!items?.length) return null;
+
+  return (
+    <Box sx={{ mt: 2 }}>
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "baseline",
+          justifyContent: "space-between",
+          gap: 2,
+          px: 0.2,
+        }}
+      >
+        <Typography
+          sx={{
+            fontWeight: 950,
+            fontSize: 22,
+            display: "flex",
+            alignItems: "center",
+            gap: 0.8,
+          }}
+        >
+          <LocalOfferRoundedIcon sx={{ color: PALETTE.accent }} />
+          Promociones
+        </Typography>
+
+        <Button
+          onClick={onGoAll}
+          sx={{
+            textTransform: "none",
+            fontWeight: 900,
+            color: alpha(PALETTE.accent, 0.82),
+            px: 1,
+            "&:hover": { background: alpha(PALETTE.accent, 0.08) },
+          }}
+        >
+          Ver todas
+        </Button>
+      </Box>
+
+      <Box
+        sx={{
+          mt: 1.4,
+          display: "grid",
+          gridTemplateColumns: {
+            xs: items.length === 1 ? "1fr" : "repeat(2, minmax(0, 1fr))",
+            sm: "repeat(2, minmax(0, 1fr))",
+          },
+          gap: 1.2,
+          alignItems: "stretch",
+          "& > *": { minWidth: 0 },
+        }}
+      >
+        {items.map((promo) => (
+          <Box key={promo?.id ?? promo?.slug} sx={{ minWidth: 0 }}>
+            <PromoMiniCard promo={promo} onOpen={onOpen} />
+          </Box>
+        ))}
+      </Box>
+
+      <Divider sx={{ my: 2.6, opacity: 0.55 }} />
+    </Box>
+  );
+}
+
+export default function StoreCatalog({
+  routeSku = null,
+  storeSlug = "perfumeria-angels",
+  branchId = DEFAULT_BRANCH_ID,
+}) {
   const router = useRouter();
 
   const skuFromQuery =
@@ -326,8 +577,12 @@ export default function StoreCatalog({ routeSku = null }) {
 
   const [cats, setCats] = React.useState([]);
   const [products, setProducts] = React.useState([]);
+  const [promos, setPromos] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
   const [err, setErr] = React.useState(null);
+
+  const [defaultLanding, setDefaultLanding] = React.useState(null);
+  const [defaultLandingApplied, setDefaultLandingApplied] = React.useState(false);
 
   const theme = useTheme();
   const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
@@ -347,55 +602,104 @@ export default function StoreCatalog({ routeSku = null }) {
   const load = React.useCallback(async () => {
     setLoading(true);
     setErr(null);
+
     try {
-      const [cRes, pRes] = await Promise.all([
+      const [cRes, pRes, promoRes] = await Promise.all([
         PublicStoreService.getCategories(),
         PublicStoreService.getProducts(),
+        PublicStoreService.getPromotions(branchId),
       ]);
 
       const cData = cRes?.data?.categories ?? [];
       const pData = pRes?.data?.products ?? [];
+      const promoData = promoRes?.data?.data ?? [];
 
       setCats(Array.isArray(cData) ? cData : []);
       setProducts(Array.isArray(pData) ? pData : []);
+      setPromos(Array.isArray(promoData) ? promoData : []);
     } catch (e) {
       setErr(e?.message || "Error cargando catálogo");
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [branchId]);
 
   React.useEffect(() => {
     load();
   }, [load]);
+
+  React.useEffect(() => {
+    if (!router.isReady) return;
+    if (!storeSlug) return;
+
+    let alive = true;
+
+    (async () => {
+      try {
+        const res = await PublicStoreService.getLandingCategory(storeSlug, branchId, PAGE_SIZE);
+        const data = res?.data ?? null;
+
+        if (!alive) return;
+
+        if (data?.ok && data?.mode === "category" && data?.category?.name) {
+          setDefaultLanding({
+            mode: "category",
+            category: data.category,
+          });
+        } else {
+          setDefaultLanding({
+            mode: "default",
+            category: null,
+          });
+        }
+      } catch (e) {
+        if (!alive) return;
+        setDefaultLanding({
+          mode: "default",
+          category: null,
+        });
+      } finally {
+        if (!alive) return;
+        setDefaultLandingApplied(true);
+      }
+    })();
+
+    return () => {
+      alive = false;
+    };
+  }, [router.isReady, storeSlug, branchId]);
 
   const catOptions = React.useMemo(() => {
     const namesFromEndpoint = (cats || []).map((c) => c?.name).filter(Boolean);
     return ["Todas", ...namesFromEndpoint];
   }, [cats]);
 
-  /* =========================================================
-     ✅ Aplicar categoría automáticamente desde ?cat=
-  ========================================================= */
   React.useEffect(() => {
     if (!router.isReady) return;
     if (!catOptions.length) return;
+    if (!defaultLandingApplied) return;
 
-    if (!catFromQuery) {
-      setCatName("Todas");
+    if (catFromQuery) {
+      const matchedCategory = getCategoryFromQuery(catFromQuery, catOptions);
+      setCatName(matchedCategory || "Todas");
       return;
     }
 
-    const matchedCategory = getCategoryFromQuery(catFromQuery, catOptions);
+    if (defaultLanding?.mode === "category" && defaultLanding?.category?.name) {
+      const matchedDefault = getCategoryFromQuery(defaultLanding.category.name, catOptions);
 
-    if (matchedCategory) {
-      setCatName((prev) => (prev !== matchedCategory ? matchedCategory : prev));
-    } else {
-      setCatName("Todas");
+      if (matchedDefault) {
+        setCatName((prev) => (prev !== matchedDefault ? matchedDefault : prev));
+        return;
+      }
     }
-  }, [router.isReady, catFromQuery, catOptions]);
+
+    setCatName("Todas");
+  }, [router.isReady, catFromQuery, catOptions, defaultLanding, defaultLandingApplied]);
 
   const baseFiltered = React.useMemo(() => {
+    if (catName === PROMO_OPTION) return [];
+
     const qq = String(q || "").trim().toLowerCase();
 
     return (products || []).filter((p) => {
@@ -412,6 +716,16 @@ export default function StoreCatalog({ routeSku = null }) {
       return matchQ && matchCat;
     });
   }, [products, q, catName]);
+
+  const promoItems = React.useMemo(() => {
+    const qq = String(q || "").trim().toLowerCase();
+
+    return (promos || []).filter((promo) => {
+      const name = String(promo?.name || "").toLowerCase();
+      const desc = String(promo?.description || "").toLowerCase();
+      return !qq || name.includes(qq) || desc.includes(qq);
+    });
+  }, [promos, q]);
 
   const novedades = React.useMemo(
     () => baseFiltered.filter((p) => Boolean(p?.new)),
@@ -433,7 +747,13 @@ export default function StoreCatalog({ routeSku = null }) {
     return arr.slice(0, 2);
   }, [novedades]);
 
+  const promosTop = React.useMemo(() => {
+    const arr = Array.isArray(promos) ? promos : [];
+    return arr.slice(0, 2);
+  }, [promos]);
+
   const showNovedades = novedadesTop.length >= 1 && novedadesTop.length <= 2;
+  const showPromosTop = promosTop.length > 0;
 
   const tabs = React.useMemo(
     () => [
@@ -446,11 +766,12 @@ export default function StoreCatalog({ routeSku = null }) {
   );
 
   const tabItems = React.useMemo(() => {
+    if (catName === PROMO_OPTION) return promoItems;
     if (tab === "destacados") return destacados;
     if (tab === "novedad") return novedades;
     if (tab === "ofertas") return descuentos;
     return baseFiltered;
-  }, [tab, destacados, novedades, descuentos, baseFiltered]);
+  }, [catName, promoItems, tab, destacados, novedades, descuentos, baseFiltered]);
 
   React.useEffect(() => {
     setPage(1);
@@ -525,10 +846,18 @@ export default function StoreCatalog({ routeSku = null }) {
     [router]
   );
 
+  const openPromo = React.useCallback(
+    (promo) => {
+      if (!promo?.slug) return;
+      router.push(`/promociones/${encodeURIComponent(promo.slug)}`);
+    },
+    [router]
+  );
+
   const closeDetail = React.useCallback(() => {
     const nextQuery = {};
 
-    if (catName && catName !== "Todas") {
+    if (catName && catName !== "Todas" && catName !== PROMO_OPTION) {
       nextQuery.cat = toSlug(catName);
     }
 
@@ -550,9 +879,14 @@ export default function StoreCatalog({ routeSku = null }) {
     }
   }, []);
 
-  /* =========================================================
-     ✅ Setter de categoría que también actualiza la URL
-  ========================================================= */
+  const goToPromos = React.useCallback(() => {
+    setCatName(PROMO_OPTION);
+    setPage(1);
+    if (typeof window !== "undefined") {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  }, []);
+
   const handleSetCatName = React.useCallback(
     (nextCat) => {
       setCatName(nextCat);
@@ -562,7 +896,7 @@ export default function StoreCatalog({ routeSku = null }) {
 
       const nextQuery = { ...router.query };
 
-      if (!nextCat || nextCat === "Todas") {
+      if (!nextCat || nextCat === "Todas" || nextCat === PROMO_OPTION) {
         delete nextQuery.cat;
       } else {
         nextQuery.cat = toSlug(nextCat);
@@ -596,6 +930,7 @@ export default function StoreCatalog({ routeSku = null }) {
           tabs={tabs}
           tabItemsCount={total}
           onReload={load}
+          promoOptionValue={PROMO_OPTION}
         />
 
         {loading ? (
@@ -620,7 +955,45 @@ export default function StoreCatalog({ routeSku = null }) {
         ) : (
           <Fade in timeout={220} key={`${tab}-${catName}-${q}-${page}`}>
             <Box sx={{ mt: 2 }}>
-              {tab === "todos" && showNovedades ? (
+              {!catFromQuery &&
+                defaultLanding?.mode === "category" &&
+                defaultLanding?.category?.name &&
+                catName !== "Todas" &&
+                catName !== PROMO_OPTION ? (
+                <Box
+                  sx={{
+                    mb: 2,
+                    p: { xs: 1.4, md: 1.8 },
+                    borderRadius: 2.2,
+                    background: `linear-gradient(135deg, ${alpha(PALETTE.accent, 0.14)} 0%, ${alpha("#000", 0.04)} 100%)`,
+                    border: `1px solid ${alpha(PALETTE.accent, 0.18)}`,
+                  }}
+                >
+                  <Typography
+                    sx={{
+                      fontWeight: 1000,
+                      color: "#111",
+                      fontSize: { xs: 16, md: 20 },
+                      lineHeight: 1.15,
+                    }}
+                  >
+                    Conoce ahora nuestra categoría:{" "}
+                    <Box component="span" sx={{ color: PALETTE.accent }}>
+                      {defaultLanding.category.name}
+                    </Box>
+                  </Typography>
+                </Box>
+              ) : null}
+
+              {tab === "todos" && catName !== PROMO_OPTION && showPromosTop ? (
+                <PromosStrip
+                  items={promosTop}
+                  onOpen={openPromo}
+                  onGoAll={goToPromos}
+                />
+              ) : null}
+
+              {tab === "todos" && catName !== PROMO_OPTION && showNovedades ? (
                 <NovedadesStrip
                   items={novedadesTop}
                   onOpen={openProduct}
@@ -631,7 +1004,25 @@ export default function StoreCatalog({ routeSku = null }) {
               {isDesktop ? (
                 <>
                   {pageItems.length ? (
-                    <DesktopProductRows items={pageItems} onOpen={openProduct} />
+                    catName === PROMO_OPTION ? (
+                      <Box
+                        sx={{
+                          display: "grid",
+                          gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+                          gap: 1.4,
+                        }}
+                      >
+                        {pageItems.map((promo) => (
+                          <PromoMiniCard
+                            key={promo.id ?? promo.slug}
+                            promo={promo}
+                            onOpen={openPromo}
+                          />
+                        ))}
+                      </Box>
+                    ) : (
+                      <DesktopProductRows items={pageItems} onOpen={openProduct} />
+                    )
                   ) : (
                     <Box
                       sx={{
@@ -643,7 +1034,9 @@ export default function StoreCatalog({ routeSku = null }) {
                       }}
                     >
                       <Typography sx={{ fontWeight: 900, color: alpha(PALETTE.grey, 0.75) }}>
-                        No hay productos con esos filtros.
+                        {catName === PROMO_OPTION
+                          ? "No hay promociones disponibles."
+                          : "No hay productos con esos filtros."}
                       </Typography>
                     </Box>
                   )}
@@ -661,9 +1054,13 @@ export default function StoreCatalog({ routeSku = null }) {
                     "& > *": { minWidth: 0 },
                   }}
                 >
-                  {pageItems.map((p) => (
-                    <Box key={p.id} sx={{ minWidth: 0 }}>
-                      <ProductCard p={p} onOpen={openProduct} />
+                  {pageItems.map((item) => (
+                    <Box key={item.id ?? item.slug} sx={{ minWidth: 0 }}>
+                      {catName === PROMO_OPTION ? (
+                        <PromoMiniCard promo={item} onOpen={openPromo} />
+                      ) : (
+                        <ProductCard p={item} onOpen={openProduct} />
+                      )}
                     </Box>
                   ))}
 
@@ -679,7 +1076,9 @@ export default function StoreCatalog({ routeSku = null }) {
                       }}
                     >
                       <Typography sx={{ fontWeight: 900, color: alpha(PALETTE.grey, 0.75) }}>
-                        No hay productos con esos filtros.
+                        {catName === PROMO_OPTION
+                          ? "No hay promociones disponibles."
+                          : "No hay productos con esos filtros."}
                       </Typography>
                     </Box>
                   ) : null}
