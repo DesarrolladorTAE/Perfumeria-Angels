@@ -22,11 +22,16 @@ import AutoAwesomeRoundedIcon from "@mui/icons-material/AutoAwesomeRounded";
 import LocalFireDepartmentRoundedIcon from "@mui/icons-material/LocalFireDepartmentRounded";
 import StarRoundedIcon from "@mui/icons-material/StarRounded";
 import AllInclusiveRoundedIcon from "@mui/icons-material/AllInclusiveRounded";
-
 import LocalOfferRoundedIcon from "@mui/icons-material/LocalOfferRounded";
 import NewReleasesRoundedIcon from "@mui/icons-material/NewReleasesRounded";
 
-import { PALETTE, calcDiscount, moneyMXN, pickCover } from "@/utils/catalogUtils";
+import {
+  PALETTE,
+  calcDiscount,
+  moneyMXN,
+  pickCover,
+} from "@/utils/catalogUtils";
+
 import CatalogHeader from "./CatalogHeader";
 import ProductCard from "./ProductCard";
 import DesktopProductRows from "./DesktopProductRows";
@@ -34,13 +39,18 @@ import DetailDialog from "./DetailDialog";
 import PaginationBar from "./PaginationBar";
 
 const PAGE_SIZE = 16;
+const STORE_SLUG = "perfumeria-angels";
 
-/** ✅ Card mini para Novedades: MISMO look que ProductCard, pero CTA "Mostrar detalles" */
+function normalizeProducts(payload) {
+  if (Array.isArray(payload)) return payload;
+  if (Array.isArray(payload?.data)) return payload.data;
+  return [];
+}
+
 function NovedadMiniCard({ p, onOpen }) {
   const cover = pickCover(p?.image);
   const dc = calcDiscount(p?.price, p?.discount);
 
-  // igual que ProductCard (compacto)
   const CARD_H = { xs: 292, sm: 310, md: 360 };
   const MEDIA_H = { xs: 132, sm: 145, md: 190 };
   const TITLE_LINES = 2;
@@ -72,22 +82,11 @@ function NovedadMiniCard({ p, onOpen }) {
         },
       }}
       onClick={handleOpen}
-      role="button"
-      tabIndex={0}
-      onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") handleOpen();
-      }}
     >
-      {/* ===== BADGES (NEW + DESCUENTO) ===== */}
       {(p?.new || dc.has) && (
         <Stack
           spacing={0.4}
-          sx={{
-            position: "absolute",
-            top: 8,
-            left: 8,
-            zIndex: 2,
-          }}
+          sx={{ position: "absolute", top: 8, left: 8, zIndex: 2 }}
         >
           {p?.new && (
             <Chip
@@ -101,7 +100,6 @@ function NovedadMiniCard({ p, onOpen }) {
                 bgcolor: "#2E7D32",
                 color: "#fff",
                 "& .MuiChip-icon": { color: "#fff" },
-                "& .MuiChip-label": { px: 0.7 },
               }}
             />
           )}
@@ -118,14 +116,12 @@ function NovedadMiniCard({ p, onOpen }) {
                 bgcolor: "#E53935",
                 color: "#fff",
                 "& .MuiChip-icon": { color: "#fff" },
-                "& .MuiChip-label": { px: 0.7 },
               }}
             />
           )}
         </Stack>
       )}
 
-      {/* ===== MEDIA ===== */}
       <Box sx={{ height: MEDIA_H, bgcolor: "#fff", overflow: "hidden" }}>
         {cover ? (
           <img
@@ -155,7 +151,6 @@ function NovedadMiniCard({ p, onOpen }) {
         )}
       </Box>
 
-      {/* ===== CONTENT ===== */}
       <Box
         sx={{
           flex: 1,
@@ -166,7 +161,6 @@ function NovedadMiniCard({ p, onOpen }) {
           flexDirection: "column",
         }}
       >
-        {/* Título */}
         <Typography
           sx={{
             fontWeight: 900,
@@ -183,13 +177,26 @@ function NovedadMiniCard({ p, onOpen }) {
           {p?.name || "Sin nombre"}
         </Typography>
 
-        {/* Rating */}
-        <Stack direction="row" alignItems="center" spacing={0.6} sx={{ mt: 0.55 }}>
-          <Rating size="small" value={Number(p?.rating || 0)} precision={0.5} readOnly />
+        <Stack
+          direction="row"
+          alignItems="center"
+          spacing={0.6}
+          sx={{ mt: 0.55 }}
+        >
+          <Rating
+            size="small"
+            value={Number(p?.rating || 0)}
+            precision={0.5}
+            readOnly
+          />
         </Stack>
 
-        {/* Precio */}
-        <Stack direction="row" alignItems="baseline" spacing={0.9} sx={{ mt: 0.8 }}>
+        <Stack
+          direction="row"
+          alignItems="baseline"
+          spacing={0.9}
+          sx={{ mt: 0.8 }}
+        >
           {dc.has && (
             <Typography
               sx={{
@@ -208,7 +215,6 @@ function NovedadMiniCard({ p, onOpen }) {
           </Typography>
         </Stack>
 
-        {/* CTA: solo detalles */}
         <Button
           fullWidth
           variant="contained"
@@ -239,14 +245,10 @@ function NovedadMiniCard({ p, onOpen }) {
 function NovedadesStrip({ items, onOpen, onGoAll }) {
   return (
     <Box sx={{ mt: 2 }}>
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "baseline",
-          justifyContent: "space-between",
-          gap: 2,
-          px: 0.2,
-        }}
+      <Stack
+        direction="row"
+        alignItems="baseline"
+        justifyContent="space-between"
       >
         <Typography sx={{ fontWeight: 950, fontSize: 22 }}>
           Novedades
@@ -258,13 +260,11 @@ function NovedadesStrip({ items, onOpen, onGoAll }) {
             textTransform: "none",
             fontWeight: 900,
             color: alpha(PALETTE.accent, 0.75),
-            px: 1,
-            "&:hover": { background: alpha(PALETTE.accent, 0.08) },
           }}
         >
           Ver todos
         </Button>
-      </Box>
+      </Stack>
 
       <Box
         sx={{
@@ -274,13 +274,11 @@ function NovedadesStrip({ items, onOpen, onGoAll }) {
             xs: items.length === 1 ? "1fr" : "repeat(2, minmax(0, 1fr))",
             sm: "repeat(2, minmax(0, 1fr))",
           },
-          gap: 1.2, // igual que tu grid mobile
-          alignItems: "stretch",
-          "& > *": { minWidth: 0 },
+          gap: 1.2,
         }}
       >
         {items.map((p) => (
-          <Box key={p?.id ?? p?.sku} sx={{ minWidth: 0 }}>
+          <Box key={p?.id ?? p?.sku}>
             <NovedadMiniCard p={p} onOpen={onOpen} />
           </Box>
         ))}
@@ -291,26 +289,37 @@ function NovedadesStrip({ items, onOpen, onGoAll }) {
   );
 }
 
-export default function StoreCatalog({ routeSku = null }) {
+export default function StoreCatalog({
+  routeSku = null,
+  storeSlug = STORE_SLUG,
+  branchId = null,
+}) {
   const router = useRouter();
-
-  const skuFromQuery =
-    router.isReady && typeof router.query?.sku === "string" ? router.query.sku : null;
-
-  const activeSku = routeSku || skuFromQuery;
-
-  const [cats, setCats] = React.useState([]);
-  const [products, setProducts] = React.useState([]);
-  const [loading, setLoading] = React.useState(true);
-  const [err, setErr] = React.useState(null);
-
   const theme = useTheme();
   const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
 
+  const skuFromQuery =
+    router.isReady && typeof router.query?.sku === "string"
+      ? router.query.sku
+      : null;
+
+  const activeSku = routeSku || skuFromQuery;
+
+  const [products, setProducts] = React.useState([]);
+  const [picks, setPicks] = React.useState([]);
+  const [siteConfig, setSiteConfig] = React.useState(null);
+  const [activeCategory, setActiveCategory] = React.useState(null);
+
+  const [loading, setLoading] = React.useState(true);
+  const [err, setErr] = React.useState(null);
+
   const [q, setQ] = React.useState("");
-  const [catName, setCatName] = React.useState("Todas");
+  const [catSlug, setCatSlug] = React.useState("");
   const [tab, setTab] = React.useState("todos");
   const [page, setPage] = React.useState(1);
+
+  const [backendPagination, setBackendPagination] = React.useState(null);
+  const [paginationEnabled, setPaginationEnabled] = React.useState(false);
 
   const [detailLoading, setDetailLoading] = React.useState(false);
   const [detailErr, setDetailErr] = React.useState(null);
@@ -319,83 +328,201 @@ export default function StoreCatalog({ routeSku = null }) {
 
   const open = Boolean(activeSku) && router.isReady;
 
+  const categoryQueryKey = siteConfig?.category_query_key || "cat";
+
+  React.useEffect(() => {
+    if (!router.isReady) return;
+
+    const urlCat = router.query?.[categoryQueryKey];
+
+    if (typeof urlCat === "string" && urlCat !== catSlug) {
+      setCatSlug(urlCat);
+    }
+  }, [router.isReady, router.query, categoryQueryKey, catSlug]);
+
   const load = React.useCallback(async () => {
+    if (!router.isReady) return;
+
     setLoading(true);
     setErr(null);
+
     try {
-      const [cRes, pRes] = await Promise.all([
-        PublicStoreService.getCategories(),
-        PublicStoreService.getProducts(),
-      ]);
+      const params = {
+        per_page: PAGE_SIZE,
+        page,
+      };
 
-      const cData = cRes?.data?.categories ?? [];
-      const pData = pRes?.data?.products ?? [];
+      if (branchId) params.branch_id = branchId;
+      if (catSlug) params[categoryQueryKey] = catSlug;
 
-      setCats(Array.isArray(cData) ? cData : []);
-      setProducts(Array.isArray(pData) ? pData : []);
+      const res = await PublicStoreService.getWhiteLabelLanding(
+        storeSlug,
+        params,
+      );
+
+      const data = res?.data || {};
+
+      if (data?.mode !== "category") {
+        const [cRes, pRes] = await Promise.all([
+          PublicStoreService.getCategories(),
+          PublicStoreService.getProducts(),
+        ]);
+
+        const categories = cRes?.data?.categories ?? [];
+        const productsList = pRes?.data?.products ?? [];
+
+        setPicks(
+          Array.isArray(categories)
+            ? categories.map((c) => ({
+                category_name: c.name,
+                category_slug: c.slug || c.name,
+                is_default: false,
+              }))
+            : [],
+        );
+
+        setSiteConfig(null);
+        setActiveCategory(null);
+        setPaginationEnabled(false);
+        setBackendPagination(null);
+        setProducts(Array.isArray(productsList) ? productsList : []);
+        return;
+      }
+
+      const productPayload = data?.products;
+      const list = normalizeProducts(productPayload);
+
+      setProducts(list);
+      setPicks(Array.isArray(data?.picks) ? data.picks : []);
+      setSiteConfig(data?.site || null);
+      setActiveCategory(data?.category || null);
+
+      if (!catSlug && data?.category?.slug) {
+        setCatSlug(data.category.slug);
+      }
+
+      setPaginationEnabled(Boolean(data?.pagination_enabled));
+
+      if (data?.pagination_enabled) {
+        setBackendPagination({
+          current_page: productPayload?.current_page || 1,
+          last_page: productPayload?.last_page || 1,
+          per_page: productPayload?.per_page || PAGE_SIZE,
+          total: productPayload?.total || list.length,
+        });
+      } else {
+        setBackendPagination(null);
+      }
     } catch (e) {
       setErr(e?.message || "Error cargando catálogo");
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [
+    router,
+    router.isReady,
+    router.pathname,
+    router.query,
+    storeSlug,
+    branchId,
+    catSlug,
+    categoryQueryKey,
+    page,
+  ]);
 
   React.useEffect(() => {
     load();
   }, [load]);
 
   const catOptions = React.useMemo(() => {
-    const namesFromEndpoint = (cats || []).map((c) => c?.name).filter(Boolean);
-    return ["Todas", ...namesFromEndpoint];
-  }, [cats]);
+    if (picks.length > 0) {
+      return picks.map((p) => ({
+        label: p?.category_name || "Categoría",
+        slug: p?.category_slug || "",
+        is_default: Boolean(p?.is_default),
+      }));
+    }
+
+    return [];
+  }, [picks]);
+
+  const selectedCatLabel = React.useMemo(() => {
+    const found = catOptions.find(
+      (c) => String(c.slug || "") === String(catSlug || ""),
+    );
+
+    return found?.label || activeCategory?.name || "Categoría";
+  }, [catOptions, catSlug, activeCategory]);
+
+  const handleCategoryChange = React.useCallback(
+    (slug) => {
+      setCatSlug(slug || "");
+      setPage(1);
+
+      const nextQuery = { ...router.query };
+      delete nextQuery.page;
+
+      if (slug) {
+        nextQuery[categoryQueryKey] = slug;
+      } else {
+        delete nextQuery[categoryQueryKey];
+      }
+
+      router.push(
+        {
+          pathname: router.pathname,
+          query: nextQuery,
+        },
+        undefined,
+        { shallow: true },
+      );
+    },
+    [router, categoryQueryKey],
+  );
 
   const baseFiltered = React.useMemo(() => {
-    const qq = String(q || "").trim().toLowerCase();
+    const qq = String(q || "")
+      .trim()
+      .toLowerCase();
 
     return (products || []).filter((p) => {
       const name = String(p?.name || "").toLowerCase();
       const sku = String(p?.sku || "").toLowerCase();
 
-      const matchQ = !qq || name.includes(qq) || sku.includes(qq);
-
-      const pcats = Array.isArray(p?.category) ? p.category : [];
-      const matchCat = catName === "Todas" || pcats.includes(catName);
-
-      return matchQ && matchCat;
+      return !qq || name.includes(qq) || sku.includes(qq);
     });
-  }, [products, q, catName]);
+  }, [products, q]);
 
   const novedades = React.useMemo(
     () => baseFiltered.filter((p) => Boolean(p?.new)),
-    [baseFiltered]
+    [baseFiltered],
   );
 
   const destacados = React.useMemo(
     () => baseFiltered.filter((p) => Number(p?.rating || 0) === 5),
-    [baseFiltered]
+    [baseFiltered],
   );
 
   const descuentos = React.useMemo(
     () => baseFiltered.filter((p) => Number(p?.discount || 0) > 0),
-    [baseFiltered]
+    [baseFiltered],
   );
 
-  // ✅ SOLO mostrar Novedades si hay 1 o 2 items
-  const novedadesTop = React.useMemo(() => {
-    const arr = Array.isArray(novedades) ? novedades : [];
-    return arr.slice(0, 2);
-  }, [novedades]);
-
+  const novedadesTop = React.useMemo(() => novedades.slice(0, 2), [novedades]);
   const showNovedades = novedadesTop.length >= 1 && novedadesTop.length <= 2;
 
   const tabs = React.useMemo(
     () => [
       { key: "destacados", label: "Destacados", icon: <StarRoundedIcon /> },
       { key: "novedad", label: "Novedad", icon: <AutoAwesomeRoundedIcon /> },
-      { key: "ofertas", label: "Ofertas", icon: <LocalFireDepartmentRoundedIcon /> },
+      {
+        key: "ofertas",
+        label: "Ofertas",
+        icon: <LocalFireDepartmentRoundedIcon />,
+      },
       { key: "todos", label: "Todo", icon: <AllInclusiveRoundedIcon /> },
     ],
-    []
+    [],
   );
 
   const tabItems = React.useMemo(() => {
@@ -407,19 +534,22 @@ export default function StoreCatalog({ routeSku = null }) {
 
   React.useEffect(() => {
     setPage(1);
-  }, [tab, q, catName]);
+  }, [tab, q, catSlug]);
 
-  const total = tabItems.length;
-  const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const total = paginationEnabled
+    ? backendPagination?.total || tabItems.length
+    : tabItems.length;
 
-  React.useEffect(() => {
-    if (page > pageCount) setPage(pageCount);
-  }, [page, pageCount]);
+  const pageCount = paginationEnabled
+    ? backendPagination?.last_page || 1
+    : Math.max(1, Math.ceil(total / PAGE_SIZE));
 
   const pageItems = React.useMemo(() => {
+    if (paginationEnabled) return tabItems;
+
     const start = (page - 1) * PAGE_SIZE;
     return tabItems.slice(start, start + PAGE_SIZE);
-  }, [tabItems, page]);
+  }, [paginationEnabled, tabItems, page]);
 
   React.useEffect(() => {
     if (!router.isReady) return;
@@ -435,7 +565,8 @@ export default function StoreCatalog({ routeSku = null }) {
     if (loading) return;
 
     const match = (products || []).find(
-      (p) => String(p?.sku || "").toLowerCase() === String(activeSku).toLowerCase()
+      (p) =>
+        String(p?.sku || "").toLowerCase() === String(activeSku).toLowerCase(),
     );
 
     if (!match?.id) {
@@ -453,9 +584,8 @@ export default function StoreCatalog({ routeSku = null }) {
 
       try {
         const res = await PublicStoreService.getProductDetail(match.id);
-        const prod = res?.data?.product ?? null;
         if (!alive) return;
-        setDetail(prod);
+        setDetail(res?.data?.product ?? null);
       } catch (e) {
         if (!alive) return;
         setDetailErr(e?.message || "No se pudo cargar el detalle");
@@ -468,31 +598,36 @@ export default function StoreCatalog({ routeSku = null }) {
     return () => {
       alive = false;
     };
-  }, [activeSku, loading, products, router.isReady, router]);
+  }, [activeSku, loading, products, router]);
 
   const openProduct = React.useCallback(
     (p) => {
       if (!p?.sku) return;
-      router.push(`/tienda/${encodeURIComponent(p.sku)}`, undefined, { shallow: true });
+
+      router.push(`/tienda/${encodeURIComponent(p.sku)}`, undefined, {
+        shallow: true,
+      });
     },
-    [router]
+    [router],
   );
 
   const closeDetail = React.useCallback(() => {
     router.push("/tienda", undefined, { shallow: true });
   }, [router]);
 
-  // ✅ "Ver todos" SOLO en Novedades => ir a Destacados (y scroll)
   const goFromNovedadesToNovedad = React.useCallback(() => {
-    setTab("novedad"); // ✅ ahora sí manda a Novedad
+    setTab("novedad");
     setPage(1);
+
     if (typeof window !== "undefined") {
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
   }, []);
 
-
-  const pageBg = `linear-gradient(180deg, ${alpha(PALETTE.white, 0.8)} 0%, ${PALETTE.white} 55%, ${PALETTE.white} 100%)`;
+  const pageBg = `linear-gradient(180deg, ${alpha(
+    PALETTE.white,
+    0.8,
+  )} 0%, ${PALETTE.white} 55%, ${PALETTE.white} 100%)`;
 
   return (
     <Box sx={{ minHeight: "100vh", background: pageBg, pb: 5 }}>
@@ -501,19 +636,70 @@ export default function StoreCatalog({ routeSku = null }) {
           q={q}
           setQ={setQ}
           catOptions={catOptions}
-          catName={catName}
-          setCatName={setCatName}
+          catSlug={catSlug}
+          selectedCatLabel={selectedCatLabel}
+          setCatSlug={handleCategoryChange}
           tab={tab}
           setTab={setTab}
           tabs={tabs}
           tabItemsCount={total}
           onReload={load}
+          activeCategory={activeCategory}
         />
+
+        {activeCategory?.name ? (
+          <Box
+            sx={{
+              mt: 1.5,
+              p: 1.5,
+              borderRadius: 2.5,
+              bgcolor: alpha(PALETTE.accent, 0.1),
+              border: `1px solid ${alpha(PALETTE.accent, 0.28)}`,
+            }}
+          >
+            <Stack
+              direction={{ xs: "column", sm: "row" }}
+              spacing={1}
+              alignItems={{ xs: "flex-start", sm: "center" }}
+              justifyContent="space-between"
+            >
+              <Box>
+                <Typography sx={{ fontWeight: 950, color: "#111" }}>
+                  Mostrando categoría:{" "}
+                  <Box component="span" sx={{ color: PALETTE.accent }}>
+                    {activeCategory.name}
+                  </Box>
+                </Typography>
+
+                <Typography
+                  variant="body2"
+                  sx={{ color: alpha("#000", 0.65), fontWeight: 700 }}
+                >
+                  Los productos se están filtrando por esta categoría.
+                </Typography>
+              </Box>
+
+              {activeCategory?.is_default ? (
+                <Chip
+                  label="Categoría default"
+                  size="small"
+                  sx={{
+                    fontWeight: 950,
+                    bgcolor: PALETTE.accent,
+                    color: "#fff",
+                  }}
+                />
+              ) : null}
+            </Stack>
+          </Box>
+        ) : null}
 
         {loading ? (
           <Box sx={{ display: "grid", placeItems: "center", py: 8 }}>
             <CircularProgress />
-            <Typography sx={{ mt: 1, fontWeight: 800, color: alpha(PALETTE.grey, 0.8) }}>
+            <Typography
+              sx={{ mt: 1, fontWeight: 800, color: alpha(PALETTE.grey, 0.8) }}
+            >
               Cargando productos…
             </Typography>
           </Box>
@@ -527,19 +713,19 @@ export default function StoreCatalog({ routeSku = null }) {
               background: alpha(PALETTE.white, 0.75),
             }}
           >
-            <Typography sx={{ fontWeight: 900, color: PALETTE.accent }}>{err}</Typography>
+            <Typography sx={{ fontWeight: 900, color: PALETTE.accent }}>
+              {err}
+            </Typography>
           </Box>
         ) : (
-          <Fade in timeout={220} key={`${tab}-${catName}-${q}-${page}`}>
+          <Fade in timeout={220} key={`${tab}-${catSlug}-${q}-${page}`}>
             <Box sx={{ mt: 2 }}>
-              {/* ✅ Novedades tipo “Home”, solo en "todos" y si hay 1–2 */}
               {tab === "todos" && showNovedades ? (
                 <NovedadesStrip
                   items={novedadesTop}
                   onOpen={openProduct}
                   onGoAll={goFromNovedadesToNovedad}
                 />
-
               ) : null}
 
               {isDesktop ? (
@@ -553,8 +739,6 @@ export default function StoreCatalog({ routeSku = null }) {
                       sm: "repeat(3, minmax(0, 1fr))",
                     },
                     gap: 1.2,
-                    alignItems: "stretch",
-                    "& > *": { minWidth: 0 },
                   }}
                 >
                   {pageItems.map((p) => (
@@ -574,7 +758,12 @@ export default function StoreCatalog({ routeSku = null }) {
                         border: `1px dashed ${alpha(PALETTE.grey, 0.25)}`,
                       }}
                     >
-                      <Typography sx={{ fontWeight: 900, color: alpha(PALETTE.grey, 0.75) }}>
+                      <Typography
+                        sx={{
+                          fontWeight: 900,
+                          color: alpha(PALETTE.grey, 0.75),
+                        }}
+                      >
                         No hay productos con esos filtros.
                       </Typography>
                     </Box>

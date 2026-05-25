@@ -10,7 +10,6 @@ const PublicStoreService = {
   },
 
   // GET /public/stores/244/products
-  // (si mañana le agregas filtros tipo ?q= o ?category=, aquí lo conectas)
   getProducts(params = {}) {
     return axiosClient.get(`public/stores/${STORE_ID}/products`, { params });
   },
@@ -21,12 +20,18 @@ const PublicStoreService = {
     return axiosClient.get(`public/stores/${STORE_ID}/products/${productId}`);
   },
 
+  // GET /public/white-label/perfumeria-angels/landing
+  getWhiteLabelLanding(params = {}) {
+    return axiosClient.get(`public/white-label/${STORE_SLUG}/landing`, {
+      params: params || {},
+    });
+  },
+
   // GET /public/tienda/perfumeria-angels/sitio
   getPublicSite() {
     return axiosClient.get(`public/tienda/${STORE_SLUG}/sitio`);
   },
 
-  // por si algún día cambias de tienda (milagro), aquí los consultas
   constants: { STORE_ID, STORE_SLUG },
 };
 
