@@ -2,37 +2,59 @@ import axiosClient from "./axiosClient";
 
 const STORE_ID = 244;
 const STORE_SLUG = "perfumeria-angels";
+const BRANCH_ID = 220;
+
+const withBranch = (params = {}) => ({
+  branch_id: BRANCH_ID,
+  ...(params || {}),
+});
 
 const PublicStoreService = {
-  // GET /public/stores/244/categories
-  getCategories() {
-    return axiosClient.get(`public/stores/${STORE_ID}/categories`);
-  },
-
-  // GET /public/stores/244/products
-  getProducts(params = {}) {
-    return axiosClient.get(`public/stores/${STORE_ID}/products`, { params });
-  },
-
-  // GET /public/stores/244/products/{productId}
-  getProductDetail(productId) {
-    if (!productId) throw new Error("productId es requerido");
-    return axiosClient.get(`public/stores/${STORE_ID}/products/${productId}`);
-  },
-
-  // GET /public/white-label/perfumeria-angels/landing
-  getWhiteLabelLanding(params = {}) {
-    return axiosClient.get(`public/white-label/${STORE_SLUG}/landing`, {
-      params: params || {},
+  getCategories(params = {}) {
+    return axiosClient.get(`public/stores/${STORE_ID}/categories`, {
+      params: withBranch(params),
     });
   },
 
-  // GET /public/tienda/perfumeria-angels/sitio
-  getPublicSite() {
-    return axiosClient.get(`public/tienda/${STORE_SLUG}/sitio`);
+  getProducts(params = {}) {
+    return axiosClient.get(`public/stores/${STORE_ID}/products`, {
+      params: withBranch(params),
+    });
   },
 
-  constants: { STORE_ID, STORE_SLUG },
+  getProductDetail(productId, params = {}) {
+    if (!productId) throw new Error("productId es requerido");
+
+    return axiosClient.get(`public/stores/${STORE_ID}/products/${productId}`, {
+      params: withBranch(params),
+    });
+  },
+
+  getWhiteLabelLanding(params = {}) {
+    return axiosClient.get(`public/white-label/${STORE_SLUG}/landing`, {
+      params: withBranch(params),
+    });
+  },
+
+  getWhiteLabelPicks(params = {}) {
+    return axiosClient.get(`public/white-label/${STORE_SLUG}/picks`, {
+      params: withBranch(params),
+    });
+  },
+
+  getWhiteLabelSite(params = {}) {
+    return axiosClient.get(`public/white-label/${STORE_SLUG}/site`, {
+      params: withBranch(params),
+    });
+  },
+
+  getPublicSite(params = {}) {
+    return axiosClient.get(`public/tienda/${STORE_SLUG}/sitio`, {
+      params: withBranch(params),
+    });
+  },
+
+  constants: { STORE_ID, STORE_SLUG, BRANCH_ID },
 };
 
 export default PublicStoreService;

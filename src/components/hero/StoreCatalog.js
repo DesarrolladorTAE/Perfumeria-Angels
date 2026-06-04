@@ -43,8 +43,81 @@ const STORE_SLUG = "perfumeria-angels";
 
 function normalizeProducts(payload) {
   if (Array.isArray(payload)) return payload;
+
   if (Array.isArray(payload?.data)) return payload.data;
+  if (Array.isArray(payload?.products)) return payload.products;
+  if (Array.isArray(payload?.products?.data)) return payload.products.data;
+
+  if (Array.isArray(payload?.data?.products)) return payload.data.products;
+  if (Array.isArray(payload?.data?.products?.data)) {
+    return payload.data.products.data;
+  }
+
   return [];
+}
+
+function normalizeCategories(payload) {
+  if (Array.isArray(payload)) return payload;
+  if (Array.isArray(payload?.categories)) return payload.categories;
+  if (Array.isArray(payload?.data)) return payload.data;
+  if (Array.isArray(payload?.data?.categories)) return payload.data.categories;
+
+  return [];
+}
+
+function getPagination(payload, fallbackTotal = 0) {
+  const source = payload?.products || payload?.data?.products || payload;
+
+  return {
+    current_page: Number(source?.current_page || 1),
+    last_page: Number(source?.last_page || 1),
+    per_page: Number(source?.per_page || PAGE_SIZE),
+    total: Number(source?.total || fallbackTotal),
+  };
+}
+
+function ProductsGrid({ items, onOpen }) {
+  return (
+    <Box
+      sx={{
+        display: "grid",
+        gridTemplateColumns: {
+          xs: "repeat(2, minmax(0, 1fr))",
+          sm: "repeat(3, minmax(0, 1fr))",
+          md: "repeat(4, minmax(0, 1fr))",
+        },
+        gap: 1.2,
+      }}
+    >
+      {items.map((p) => (
+        <Box key={p?.id ?? p?.sku} sx={{ minWidth: 0 }}>
+          <ProductCard p={p} onOpen={onOpen} />
+        </Box>
+      ))}
+
+      {!items.length ? (
+        <Box
+          sx={{
+            gridColumn: "1 / -1",
+            mt: 1,
+            p: 2.2,
+            borderRadius: 2.5,
+            background: alpha(PALETTE.white, 0.8),
+            border: `1px dashed ${alpha(PALETTE.grey, 0.25)}`,
+          }}
+        >
+          <Typography
+            sx={{
+              fontWeight: 900,
+              color: alpha(PALETTE.grey, 0.75),
+            }}
+          >
+            No hay productos con esos filtros.
+          </Typography>
+        </Box>
+      ) : null}
+    </Box>
+  );
 }
 
 function NovedadMiniCard({ p, onOpen }) {
@@ -327,7 +400,6 @@ export default function StoreCatalog({
   const [activeImg, setActiveImg] = React.useState(0);
 
   const open = Boolean(activeSku) && router.isReady;
-
   const categoryQueryKey = siteConfig?.category_query_key || "cat";
 
   React.useEffect(() => {
@@ -355,96 +427,97 @@ export default function StoreCatalog({
       if (branchId) params.branch_id = branchId;
       if (catSlug) params[categoryQueryKey] = catSlug;
 
-      const res = await PublicStoreService.getWhiteLabelLanding(
-        storeSlug,
-        params,
-      );
+      const res = await PublicStoreService.getWhiteLabelLanding(params);
 
       const data = res?.data || {};
+      const landingProducts = normalizeProducts(data?.products);
 
-      if (data?.mode !== "category") {
-        const [cRes, pRes] = await Promise.all([
-          PublicStoreService.getCategories(),
-          PublicStoreService.getProducts(),
-        ]);
+      if (data?.mode === "category" || landingProducts.length > 0) {
+        setProducts(landingProducts);
+        setPicks(Array.isArray(data?.picks) ? data.picks : []);
+        setSiteConfig(data?.site || null);
+        setActiveCategory(data?.category || null);
 
-        const categories = cRes?.data?.categories ?? [];
-        const productsList = pRes?.data?.products ?? [];
+        if (!catSlug && data?.category?.slug) {
+          setCatSlug(data.category.slug);
+        }
 
-        setPicks(
-          Array.isArray(categories)
-            ? categories.map((c) => ({
-                category_name: c.name,
-                category_slug: c.slug || c.name,
-                is_default: false,
-              }))
-            : [],
-        );
+        const hasPagination = Boolean(data?.pagination_enabled);
 
-        setSiteConfig(null);
-        setActiveCategory(null);
-        setPaginationEnabled(false);
-        setBackendPagination(null);
-        setProducts(Array.isArray(productsList) ? productsList : []);
+        setPaginationEnabled(hasPagination);
+
+        if (hasPagination) {
+          setBackendPagination(getPagination(data, landingProducts.length));
+        } else {
+          setBackendPagination(null);
+        }
+
         return;
       }
 
-      const productPayload = data?.products;
-      const list = normalizeProducts(productPayload);
+      const [cRes, pRes] = await Promise.all([
+        PublicStoreService.getCategories(),
+        PublicStoreService.getProducts(params),
+      ]);
 
-      setProducts(list);
-      setPicks(Array.isArray(data?.picks) ? data.picks : []);
-      setSiteConfig(data?.site || null);
-      setActiveCategory(data?.category || null);
+      const categories = normalizeCategories(cRes?.data);
+      const productsList = normalizeProducts(pRes?.data);
 
-      if (!catSlug && data?.category?.slug) {
-        setCatSlug(data.category.slug);
-      }
+      setPicks(
+        categories.map((c) => ({
+          category_name: c?.name || "Categoría",
+          category_slug: c?.slug || c?.name || "",
+          is_default: false,
+        })),
+      );
 
-      setPaginationEnabled(Boolean(data?.pagination_enabled));
-
-      if (data?.pagination_enabled) {
-        setBackendPagination({
-          current_page: productPayload?.current_page || 1,
-          last_page: productPayload?.last_page || 1,
-          per_page: productPayload?.per_page || PAGE_SIZE,
-          total: productPayload?.total || list.length,
-        });
-      } else {
-        setBackendPagination(null);
-      }
+      setSiteConfig(null);
+      setActiveCategory(null);
+      setPaginationEnabled(false);
+      setBackendPagination(null);
+      setProducts(productsList);
     } catch (e) {
-      setErr(e?.message || "Error cargando catálogo");
+      setErr(
+        e?.response?.data?.message || e?.message || "Error cargando catálogo",
+      );
     } finally {
       setLoading(false);
     }
-  }, [
-    router,
-    router.isReady,
-    router.pathname,
-    router.query,
-    storeSlug,
-    branchId,
-    catSlug,
-    categoryQueryKey,
-    page,
-  ]);
+  }, [router.isReady, storeSlug, branchId, catSlug, categoryQueryKey, page]);
 
   React.useEffect(() => {
     load();
   }, [load]);
 
-  const catOptions = React.useMemo(() => {
-    if (picks.length > 0) {
-      return picks.map((p) => ({
-        label: p?.category_name || "Categoría",
-        slug: p?.category_slug || "",
-        is_default: Boolean(p?.is_default),
-      }));
-    }
+const catOptions = React.useMemo(() => {
+  return (picks || []).map((p) => {
+    const label =
+      p?.category_name ||
+      p?.name ||
+      p?.label ||
+      p?.category?.name ||
+      `Categoría ${p?.category_id || p?.id || ""}`;
 
-    return [];
-  }, [picks]);
+    const slug =
+      p?.category_slug ||
+      p?.slug ||
+      p?.category?.slug ||
+      String(p?.category_id || p?.id || "");
+
+    const isPrincipal =
+      p?.is_default === true ||
+      p?.is_default === 1 ||
+      p?.is_default === "1" ||
+      p?.is_default === "true";
+
+    return {
+      label,
+      slug,
+      category_id: p?.category_id || p?.category?.id || p?.id,
+      is_default: isPrincipal,
+    };
+  });
+}, [picks]);
 
   const selectedCatLabel = React.useMemo(() => {
     const found = catOptions.find(
@@ -585,10 +658,15 @@ export default function StoreCatalog({
       try {
         const res = await PublicStoreService.getProductDetail(match.id);
         if (!alive) return;
-        setDetail(res?.data?.product ?? null);
+
+        setDetail(res?.data?.product ?? res?.data?.data ?? res?.data ?? null);
       } catch (e) {
         if (!alive) return;
-        setDetailErr(e?.message || "No se pudo cargar el detalle");
+        setDetailErr(
+          e?.response?.data?.message ||
+            e?.message ||
+            "No se pudo cargar el detalle",
+        );
       } finally {
         if (!alive) return;
         setDetailLoading(false);
@@ -647,53 +725,6 @@ export default function StoreCatalog({
           activeCategory={activeCategory}
         />
 
-        {activeCategory?.name ? (
-          <Box
-            sx={{
-              mt: 1.5,
-              p: 1.5,
-              borderRadius: 2.5,
-              bgcolor: alpha(PALETTE.accent, 0.1),
-              border: `1px solid ${alpha(PALETTE.accent, 0.28)}`,
-            }}
-          >
-            <Stack
-              direction={{ xs: "column", sm: "row" }}
-              spacing={1}
-              alignItems={{ xs: "flex-start", sm: "center" }}
-              justifyContent="space-between"
-            >
-              <Box>
-                <Typography sx={{ fontWeight: 950, color: "#111" }}>
-                  Mostrando categoría:{" "}
-                  <Box component="span" sx={{ color: PALETTE.accent }}>
-                    {activeCategory.name}
-                  </Box>
-                </Typography>
-
-                <Typography
-                  variant="body2"
-                  sx={{ color: alpha("#000", 0.65), fontWeight: 700 }}
-                >
-                  Los productos se están filtrando por esta categoría.
-                </Typography>
-              </Box>
-
-              {activeCategory?.is_default ? (
-                <Chip
-                  label="Categoría default"
-                  size="small"
-                  sx={{
-                    fontWeight: 950,
-                    bgcolor: PALETTE.accent,
-                    color: "#fff",
-                  }}
-                />
-              ) : null}
-            </Stack>
-          </Box>
-        ) : null}
-
         {loading ? (
           <Box sx={{ display: "grid", placeItems: "center", py: 8 }}>
             <CircularProgress />
@@ -728,47 +759,10 @@ export default function StoreCatalog({
                 />
               ) : null}
 
-              {isDesktop ? (
+              {isDesktop && pageItems.length ? (
                 <DesktopProductRows items={pageItems} onOpen={openProduct} />
               ) : (
-                <Box
-                  sx={{
-                    display: "grid",
-                    gridTemplateColumns: {
-                      xs: "repeat(2, minmax(0, 1fr))",
-                      sm: "repeat(3, minmax(0, 1fr))",
-                    },
-                    gap: 1.2,
-                  }}
-                >
-                  {pageItems.map((p) => (
-                    <Box key={p.id} sx={{ minWidth: 0 }}>
-                      <ProductCard p={p} onOpen={openProduct} />
-                    </Box>
-                  ))}
-
-                  {!pageItems.length ? (
-                    <Box
-                      sx={{
-                        gridColumn: "1 / -1",
-                        mt: 1,
-                        p: 2.2,
-                        borderRadius: 2.5,
-                        background: alpha(PALETTE.white, 0.8),
-                        border: `1px dashed ${alpha(PALETTE.grey, 0.25)}`,
-                      }}
-                    >
-                      <Typography
-                        sx={{
-                          fontWeight: 900,
-                          color: alpha(PALETTE.grey, 0.75),
-                        }}
-                      >
-                        No hay productos con esos filtros.
-                      </Typography>
-                    </Box>
-                  ) : null}
-                </Box>
+                <ProductsGrid items={pageItems} onOpen={openProduct} />
               )}
 
               <PaginationBar
