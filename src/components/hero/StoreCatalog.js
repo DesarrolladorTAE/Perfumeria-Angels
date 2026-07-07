@@ -399,125 +399,171 @@ export default function StoreCatalog({
   const [detail, setDetail] = React.useState(null);
   const [activeImg, setActiveImg] = React.useState(0);
 
+  const lastLandingRequestRef = React.useRef("");
+  const abortLandingRef = React.useRef(false);
+  const lastDetailRequestRef = React.useRef("");
+
   const open = Boolean(activeSku) && router.isReady;
   const categoryQueryKey = siteConfig?.category_query_key || "cat";
+  const urlCat = router.query?.[categoryQueryKey];
 
   React.useEffect(() => {
     if (!router.isReady) return;
-
-    const urlCat = router.query?.[categoryQueryKey];
 
     if (typeof urlCat === "string" && urlCat !== catSlug) {
       setCatSlug(urlCat);
+      setPage(1);
     }
-  }, [router.isReady, router.query, categoryQueryKey, catSlug]);
+  }, [router.isReady, urlCat, catSlug]);
 
-  const load = React.useCallback(async () => {
-    if (!router.isReady) return;
+  const load = React.useCallback(
+    async ({ force = false } = {}) => {
+      if (!router.isReady) return;
 
-    setLoading(true);
-    setErr(null);
-
-    try {
-      const params = {
-        per_page: PAGE_SIZE,
+      const requestKey = JSON.stringify({
+        storeSlug,
+        branchId: branchId || null,
+        catSlug: catSlug || "",
+        categoryQueryKey,
         page,
-      };
+        perPage: PAGE_SIZE,
+      });
 
-      if (branchId) params.branch_id = branchId;
-      if (catSlug) params[categoryQueryKey] = catSlug;
-
-      const res = await PublicStoreService.getWhiteLabelLanding(params);
-
-      const data = res?.data || {};
-      const landingProducts = normalizeProducts(data?.products);
-
-      if (data?.mode === "category" || landingProducts.length > 0) {
-        setProducts(landingProducts);
-        setPicks(Array.isArray(data?.picks) ? data.picks : []);
-        setSiteConfig(data?.site || null);
-        setActiveCategory(data?.category || null);
-
-        if (!catSlug && data?.category?.slug) {
-          setCatSlug(data.category.slug);
-        }
-
-        const hasPagination = Boolean(data?.pagination_enabled);
-
-        setPaginationEnabled(hasPagination);
-
-        if (hasPagination) {
-          setBackendPagination(getPagination(data, landingProducts.length));
-        } else {
-          setBackendPagination(null);
-        }
-
+      if (!force && lastLandingRequestRef.current === requestKey) {
         return;
       }
 
-      const [cRes, pRes] = await Promise.all([
-        PublicStoreService.getCategories(),
-        PublicStoreService.getProducts(params),
-      ]);
+      lastLandingRequestRef.current = requestKey;
+      abortLandingRef.current = false;
 
-      const categories = normalizeCategories(cRes?.data);
-      const productsList = normalizeProducts(pRes?.data);
+      setLoading(true);
+      setErr(null);
 
-      setPicks(
-        categories.map((c) => ({
-          category_name: c?.name || "Categoría",
-          category_slug: c?.slug || c?.name || "",
-          is_default: false,
-        })),
-      );
+      try {
+        const params = {
+          per_page: PAGE_SIZE,
+          page,
+        };
 
-      setSiteConfig(null);
-      setActiveCategory(null);
-      setPaginationEnabled(false);
-      setBackendPagination(null);
-      setProducts(productsList);
-    } catch (e) {
-      setErr(
-        e?.response?.data?.message || e?.message || "Error cargando catálogo",
-      );
-    } finally {
-      setLoading(false);
-    }
-  }, [router.isReady, storeSlug, branchId, catSlug, categoryQueryKey, page]);
+        if (branchId) params.branch_id = branchId;
+        if (catSlug) params[categoryQueryKey] = catSlug;
+
+        const res = await PublicStoreService.getWhiteLabelLanding(params);
+
+        if (abortLandingRef.current) return;
+
+        const data = res?.data || {};
+        const landingProducts = normalizeProducts(data?.products);
+
+        if (data?.mode === "category" || landingProducts.length > 0) {
+          setProducts(landingProducts);
+          setPicks(Array.isArray(data?.picks) ? data.picks : []);
+          setSiteConfig(data?.site || null);
+          setActiveCategory(data?.category || null);
+
+          const newSlug = data?.category?.slug;
+
+          if (!catSlug && newSlug) {
+            setCatSlug((prev) => {
+              if (prev === newSlug) return prev;
+              return newSlug;
+            });
+          }
+
+          const hasPagination = Boolean(data?.pagination_enabled);
+
+          setPaginationEnabled(hasPagination);
+
+          if (hasPagination) {
+            setBackendPagination(getPagination(data, landingProducts.length));
+          } else {
+            setBackendPagination(null);
+          }
+
+          return;
+        }
+
+        const [cRes, pRes] = await Promise.all([
+          PublicStoreService.getCategories(),
+          PublicStoreService.getProducts(params),
+        ]);
+
+        if (abortLandingRef.current) return;
+
+        const categories = normalizeCategories(cRes?.data);
+        const productsList = normalizeProducts(pRes?.data);
+
+        setPicks(
+          categories.map((c) => ({
+            category_name: c?.name || "Categoría",
+            category_slug: c?.slug || c?.name || "",
+            is_default: false,
+          })),
+        );
+
+        setSiteConfig(null);
+        setActiveCategory(null);
+        setPaginationEnabled(false);
+        setBackendPagination(null);
+        setProducts(productsList);
+      } catch (e) {
+        if (abortLandingRef.current) return;
+
+        setErr(
+          e?.response?.data?.message || e?.message || "Error cargando catálogo",
+        );
+      } finally {
+        if (!abortLandingRef.current) {
+          setLoading(false);
+        }
+      }
+    },
+    [router.isReady, storeSlug, branchId, catSlug, categoryQueryKey, page],
+  );
 
   React.useEffect(() => {
+    abortLandingRef.current = false;
     load();
+
+    return () => {
+      abortLandingRef.current = true;
+    };
   }, [load]);
 
-const catOptions = React.useMemo(() => {
-  return (picks || []).map((p) => {
-    const label =
-      p?.category_name ||
-      p?.name ||
-      p?.label ||
-      p?.category?.name ||
-      `Categoría ${p?.category_id || p?.id || ""}`;
+  const handleReload = React.useCallback(() => {
+    lastLandingRequestRef.current = "";
+    load({ force: true });
+  }, [load]);
 
-    const slug =
-      p?.category_slug ||
-      p?.slug ||
-      p?.category?.slug ||
-      String(p?.category_id || p?.id || "");
+  const catOptions = React.useMemo(() => {
+    return (picks || []).map((p) => {
+      const label =
+        p?.category_name ||
+        p?.name ||
+        p?.label ||
+        p?.category?.name ||
+        `Categoría ${p?.category_id || p?.id || ""}`;
 
-    const isPrincipal =
-      p?.is_default === true ||
-      p?.is_default === 1 ||
-      p?.is_default === "1" ||
-      p?.is_default === "true";
+      const slug =
+        p?.category_slug ||
+        p?.slug ||
+        p?.category?.slug ||
+        String(p?.category_id || p?.id || "");
 
-    return {
-      label,
-      slug,
-      category_id: p?.category_id || p?.category?.id || p?.id,
-      is_default: isPrincipal,
-    };
-  });
-}, [picks]);
+      const isPrincipal =
+        p?.is_default === true ||
+        p?.is_default === 1 ||
+        p?.is_default === "1" ||
+        p?.is_default === "true";
+
+      return {
+        label,
+        slug,
+        category_id: p?.category_id || p?.category?.id || p?.id,
+        is_default: isPrincipal,
+      };
+    });
+  }, [picks]);
 
   const selectedCatLabel = React.useMemo(() => {
     const found = catOptions.find(
@@ -529,14 +575,20 @@ const catOptions = React.useMemo(() => {
 
   const handleCategoryChange = React.useCallback(
     (slug) => {
-      setCatSlug(slug || "");
+      const nextSlug = slug || "";
+
+      setCatSlug((prev) => {
+        if (prev === nextSlug) return prev;
+        return nextSlug;
+      });
+
       setPage(1);
 
       const nextQuery = { ...router.query };
       delete nextQuery.page;
 
-      if (slug) {
-        nextQuery[categoryQueryKey] = slug;
+      if (nextSlug) {
+        nextQuery[categoryQueryKey] = nextSlug;
       } else {
         delete nextQuery[categoryQueryKey];
       }
@@ -606,23 +658,21 @@ const catOptions = React.useMemo(() => {
   }, [tab, destacados, novedades, descuentos, baseFiltered]);
 
   React.useEffect(() => {
-    setPage(1);
+    setPage((prev) => {
+      if (prev === 1) return prev;
+      return 1;
+    });
   }, [tab, q, catSlug]);
 
   const total = paginationEnabled
     ? backendPagination?.total || tabItems.length
     : tabItems.length;
 
-  const pageCount = paginationEnabled
-    ? backendPagination?.last_page || 1
-    : Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const pageCount = paginationEnabled ? backendPagination?.last_page || 1 : 1;
 
   const pageItems = React.useMemo(() => {
-    if (paginationEnabled) return tabItems;
-
-    const start = (page - 1) * PAGE_SIZE;
-    return tabItems.slice(start, start + PAGE_SIZE);
-  }, [paginationEnabled, tabItems, page]);
+    return tabItems;
+  }, [tabItems]);
 
   React.useEffect(() => {
     if (!router.isReady) return;
@@ -632,6 +682,7 @@ const catOptions = React.useMemo(() => {
       setDetailErr(null);
       setDetailLoading(false);
       setActiveImg(0);
+      lastDetailRequestRef.current = "";
       return;
     }
 
@@ -646,6 +697,14 @@ const catOptions = React.useMemo(() => {
       router.push("/tienda", undefined, { shallow: true });
       return;
     }
+
+    const detailRequestKey = String(match.id);
+
+    if (lastDetailRequestRef.current === detailRequestKey) {
+      return;
+    }
+
+    lastDetailRequestRef.current = detailRequestKey;
 
     let alive = true;
 
@@ -662,6 +721,9 @@ const catOptions = React.useMemo(() => {
         setDetail(res?.data?.product ?? res?.data?.data ?? res?.data ?? null);
       } catch (e) {
         if (!alive) return;
+
+        lastDetailRequestRef.current = "";
+
         setDetailErr(
           e?.response?.data?.message ||
             e?.message ||
@@ -721,7 +783,7 @@ const catOptions = React.useMemo(() => {
           setTab={setTab}
           tabs={tabs}
           tabItemsCount={total}
-          onReload={load}
+          onReload={handleReload}
           activeCategory={activeCategory}
         />
 
@@ -765,13 +827,15 @@ const catOptions = React.useMemo(() => {
                 <ProductsGrid items={pageItems} onOpen={openProduct} />
               )}
 
-              <PaginationBar
-                page={page}
-                pageCount={pageCount}
-                total={total}
-                pageSize={PAGE_SIZE}
-                onChange={(v) => setPage(v)}
-              />
+              {paginationEnabled ? (
+                <PaginationBar
+                  page={page}
+                  pageCount={pageCount}
+                  total={total}
+                  pageSize={PAGE_SIZE}
+                  onChange={(v) => setPage(v)}
+                />
+              ) : null}
 
               <Divider sx={{ my: 2.6, opacity: 0.55 }} />
             </Box>

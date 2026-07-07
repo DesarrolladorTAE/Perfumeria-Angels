@@ -76,7 +76,7 @@ export default function CatalogHeader({
 
   const currentCategoryName = React.useMemo(() => {
     const found = safeCatOptions.find(
-      (cat) => getCatSlug(cat) === currentCategorySlug
+      (cat) => getCatSlug(cat) === currentCategorySlug,
     );
 
     return (
@@ -90,9 +90,11 @@ export default function CatalogHeader({
     return safeCatOptions.find((cat) => isPrincipalCategory(cat)) || null;
   }, [safeCatOptions]);
 
-  const principalLabel = principalCategory
+  const hasPrincipalCategory = Boolean(principalCategory);
+
+  const principalLabel = hasPrincipalCategory
     ? getCatLabel(principalCategory)
-    : currentCategoryName;
+    : "";
 
   return (
     <Box
@@ -216,8 +218,8 @@ export default function CatalogHeader({
               ),
             }}
           />
-          
-          {principalLabel ? (
+
+          {hasPrincipalCategory && principalLabel ? (
             <Box
               sx={{
                 width: "100%",
@@ -225,7 +227,7 @@ export default function CatalogHeader({
                 p: { xs: 1.2, md: 1.4 },
                 background: `linear-gradient(90deg, ${alpha(
                   PALETTE.accent,
-                  0.28
+                  0.28,
                 )}, ${alpha("#fff", 0.06)})`,
                 border: `1px solid ${alpha(PALETTE.accent, 0.42)}`,
               }}
@@ -350,8 +352,8 @@ export default function CatalogHeader({
                         bgcolor: active
                           ? PALETTE.accent
                           : principal
-                          ? alpha(PALETTE.accent, 0.2)
-                          : alpha("#fff", 0.06),
+                            ? alpha(PALETTE.accent, 0.2)
+                            : alpha("#fff", 0.06),
                         color: active ? "#fff" : alpha("#fff", 0.92),
                         border: `1px solid ${
                           active || principal

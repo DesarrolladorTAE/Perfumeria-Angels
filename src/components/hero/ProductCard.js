@@ -1,12 +1,24 @@
 import * as React from "react";
-import { Box, Button, Chip, Rating, Stack, Typography, alpha } from "@mui/material";
+import {
+  Box,
+  Button,
+  Chip,
+  Rating,
+  Stack,
+  Typography,
+  alpha,
+} from "@mui/material";
 import LocalOfferRoundedIcon from "@mui/icons-material/LocalOfferRounded";
 import NewReleasesRoundedIcon from "@mui/icons-material/NewReleasesRounded";
 import AddShoppingCartRoundedIcon from "@mui/icons-material/AddShoppingCartRounded";
 import VisibilityRoundedIcon from "@mui/icons-material/VisibilityRounded";
 
-
-import { PALETTE, calcDiscount, moneyMXN, pickCover } from "@/utils/catalogUtils";
+import {
+  PALETTE,
+  calcDiscount,
+  moneyMXN,
+  pickCover,
+} from "@/utils/catalogUtils";
 import { useCart } from "@/context/CartContext";
 
 export default function ProductCard({ p, onOpen }) {
@@ -20,6 +32,13 @@ export default function ProductCard({ p, onOpen }) {
   const MEDIA_H = { xs: 132, sm: 145, md: 190 };
   const TITLE_LINES = 2;
 
+  const promo = p?.promotion;
+
+  const hasBulkPromo =
+    promo?.type === "bulk" && Number(promo?.min_qty || 0) > 0;
+
+  const promoPrice = Number(promo?.price || 0);
+
   const handleOpen = React.useCallback(() => {
     if (!p?.sku) return;
     onOpen?.(p);
@@ -28,9 +47,9 @@ export default function ProductCard({ p, onOpen }) {
   const handleAdd = React.useCallback(
     (e) => {
       e.stopPropagation(); // ✅ evita abrir detalle
-      add(p, 1);           // ✅ agrega 1 al carrito
+      add(p, 1); // ✅ agrega 1 al carrito
     },
-    [add, p]
+    [add, p],
   );
 
   return (
@@ -167,12 +186,27 @@ export default function ProductCard({ p, onOpen }) {
         </Typography>
 
         {/* Rating */}
-        <Stack direction="row" alignItems="center" spacing={0.6} sx={{ mt: 0.55 }}>
-          <Rating size="small" value={Number(p?.rating || 0)} precision={0.5} readOnly />
+        <Stack
+          direction="row"
+          alignItems="center"
+          spacing={0.6}
+          sx={{ mt: 0.55 }}
+        >
+          <Rating
+            size="small"
+            value={Number(p?.rating || 0)}
+            precision={0.5}
+            readOnly
+          />
         </Stack>
 
         {/* Precio */}
-        <Stack direction="row" alignItems="baseline" spacing={0.9} sx={{ mt: 0.8 }}>
+        <Stack
+          direction="row"
+          alignItems="baseline"
+          spacing={0.9}
+          sx={{ mt: 0.8 }}
+        >
           {dc.has && (
             <Typography
               sx={{
@@ -190,6 +224,31 @@ export default function ProductCard({ p, onOpen }) {
             {moneyMXN(dc.final)}
           </Typography>
         </Stack>
+
+        {hasBulkPromo && (
+          <Box
+            sx={{
+              mt: 0.7,
+              px: 0.8,
+              py: 0.55,
+              borderRadius: 1.2,
+              bgcolor: "rgba(46,125,50,0.10)",
+              border: "1px solid rgba(46,125,50,0.25)",
+            }}
+          >
+            <Typography
+              sx={{ fontSize: 11, fontWeight: 900, color: "#2E7D32" }}
+            >
+              {promoPrice > 0
+                ? `Mayoreo: ${moneyMXN(promoPrice)}`
+                : promo?.name || "Promoción por mayoreo"}
+            </Typography>
+
+            <Typography sx={{ fontSize: 10.5, fontWeight: 700, color: "#333" }}>
+              A partir de {promo.min_qty} piezas
+            </Typography>
+          </Box>
+        )}
 
         <Button
           fullWidth
@@ -209,12 +268,11 @@ export default function ProductCard({ p, onOpen }) {
           }}
           onClick={(e) => {
             e.stopPropagation(); // 🔒 evita doble evento
-            handleOpen();        // 👁 abre detalles
+            handleOpen(); // 👁 abre detalles
           }}
         >
           Mostrar detalles
         </Button>
-
       </Box>
     </Box>
   );

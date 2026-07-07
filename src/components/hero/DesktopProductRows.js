@@ -9,7 +9,12 @@ import {
   alpha,
 } from "@mui/material";
 import LocalOfferRoundedIcon from "@mui/icons-material/LocalOfferRounded";
-import { PALETTE, calcDiscount, moneyMXN, pickCover } from "@/utils/catalogUtils";
+import {
+  PALETTE,
+  calcDiscount,
+  moneyMXN,
+  pickCover,
+} from "@/utils/catalogUtils";
 
 export default function DesktopProductGrid({ items, onOpen }) {
   return (
@@ -24,6 +29,11 @@ export default function DesktopProductGrid({ items, onOpen }) {
       {items.map((p) => {
         const cover = pickCover(p?.image);
         const dc = calcDiscount(p?.price, p?.discount);
+
+        const promo = p?.promotion;
+        const hasBulkPromo =
+          promo?.type === "bulk" && Number(promo?.min_qty || 0) > 0;
+        const promoPrice = Number(promo?.price || 0);
 
         return (
           <Box
@@ -72,7 +82,9 @@ export default function DesktopProductGrid({ items, onOpen }) {
                   }}
                 />
               ) : (
-                <Typography sx={{ fontWeight: 800, color: alpha(PALETTE.grey, 0.6) }}>
+                <Typography
+                  sx={{ fontWeight: 800, color: alpha(PALETTE.grey, 0.6) }}
+                >
                   Sin imagen
                 </Typography>
               )}
@@ -100,7 +112,9 @@ export default function DesktopProductGrid({ items, onOpen }) {
                   readOnly
                 />
                 {p?.saleCount ? (
-                  <Typography sx={{ fontSize: 12, color: alpha(PALETTE.grey, 0.7) }}>
+                  <Typography
+                    sx={{ fontSize: 12, color: alpha(PALETTE.grey, 0.7) }}
+                  >
                     ({p.saleCount})
                   </Typography>
                 ) : null}
@@ -144,6 +158,50 @@ export default function DesktopProductGrid({ items, onOpen }) {
                   />
                 )}
               </Stack>
+              {hasBulkPromo && (
+                <Box
+                  sx={{
+                    mt: 0.7,
+                    px: 1,
+                    py: 0.8,
+                    borderRadius: 1.5,
+                    bgcolor: "rgba(46,125,50,0.10)",
+                    border: "1px solid rgba(46,125,50,0.25)",
+                  }}
+                >
+                  <Typography
+                    sx={{
+                      fontSize: 12,
+                      fontWeight: 900,
+                      color: "#2E7D32",
+                    }}
+                  >
+                    {promo.name}
+                  </Typography>
+
+                  {promoPrice > 0 && (
+                    <Typography
+                      sx={{
+                        fontSize: 11,
+                        fontWeight: 800,
+                        color: "#333",
+                        mt: 0.2,
+                      }}
+                    >
+                      Precio especial: {moneyMXN(promoPrice)}
+                    </Typography>
+                  )}
+
+                  <Typography
+                    sx={{
+                      fontSize: 11,
+                      color: "#555",
+                    }}
+                  >
+                    Desde {promo.min_qty} piezas
+                  </Typography>
+                </Box>
+              )}
 
               {/* botón */}
               <Box sx={{ mt: "auto" }}>
